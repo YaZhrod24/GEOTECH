@@ -23,7 +23,7 @@
             </div>
 
             <!-- Formulaire pointant vers votre route MVC -->
-            <form action="/auth/login" method="POST">
+            <form action="" method="POST">
 
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control rounded-3" id="email" name="email"

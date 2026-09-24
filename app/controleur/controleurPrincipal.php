@@ -76,6 +76,9 @@ class ControleurPrincipal
     private function login()
     {
         $titre = "Connexion - Geotech";
+
+        require_once Racine . '/../app/modele/bd.php';
+
         require_once Racine . '/../app/controleur/controleurLogin.php';
     }
 
