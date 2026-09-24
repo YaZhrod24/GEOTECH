@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Si l'URL ne correspond pas à un fichier existant,
+# on l'envoie vers public/index.php
+
+RewriteCond %{REQUEST_FILENAME} !-f
+
+RewriteRule ^ public/index.php [L]
