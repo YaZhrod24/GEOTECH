@@ -20,8 +20,8 @@ class ControleurPrincipal
         // 'url' => 'méthode'
         // {id} représente un integer
         $routes = [
-            '' => 'accueil',
-            'utilisateurs' => 'listeUtilisateurs',
+            '' => 'dashboard',
+            'login' => 'login',
             'utilisateur/{id}' => 'afficherUtilisateur',
             'utilisateur/{id}/modifier' => 'modifierUtilisateur',
             'utilisateur/{id}/supprimer' => 'supprimerUtilisateur',
@@ -66,15 +66,17 @@ class ControleurPrincipal
 
 
 
-    private function accueil()
+    private function dashboard()
     {
-        require_once Racine . '/../app/controleur/controleurAccueil.php';
+        $titre = "Dashboard - Geotech";
+        require_once Racine . '/../app/controleur/controleurDashboard.php';
     }
 
 
-    private function listeUtilisateurs()
+    private function login()
     {
-        echo "Liste des utilisateurs";
+        $titre = "Connexion - Geotech";
+        require_once Racine . '/../app/controleur/controleurLogin.php';
     }
 
 
