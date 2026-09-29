@@ -20,7 +20,11 @@ class EmployeDAO extends PDO_Connexion
 
         if ($result) {
             if (password_verify($password, $result["mdp"])) {
-                return $this->hydrater($result);
+                if ($result["role"] === "MANAGER") {
+                    return $this->hydrater($result);
+                } else {
+                    return "Vous n'avez pas les droits nécessaires pour accéder à cette application."; // Rôle non autorisé
+                }
             } else {
                 return "Mot de passe incorrect."; // Mot de passe incorrect
             }
