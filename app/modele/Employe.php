@@ -10,7 +10,7 @@ class Employe
     private $tel;
     private $role;
 
-    private function __construct($id, $nom, $prenom, $email, $mdp, $tel, $role)
+    public function __construct($id, $nom, $prenom, $email, $mdp, $tel, $role)
     {
         $this->id = $id;
         $this->nom = $nom;
