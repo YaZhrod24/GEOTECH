@@ -1,4 +1,15 @@
 <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light">
+
+    <!-- Popup d'erreur  -->
+    <?php if (isset($error)): ?>
+        <div class="alert alert-danger alert-dismissible fade show position-absolute top-0 start-50 translate-middle-x mt-3"
+            role="alert" style="z-index: 1050;">
+            <strong>Erreur !</strong>
+            <?= htmlspecialchars($error) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="row w-100 shadow-lg rounded-4 overflow-hidden bg-white" style="max-width: 900px;">
 
         <!-- Left Side: Atypical Brand/Visual Panel -->
@@ -38,7 +49,7 @@
                 </div>
 
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-dark btn-lg rounded-3 fw-semibold py-3">
+                    <button type="submit" name="login" class="btn btn-dark btn-lg rounded-3 fw-semibold py-3">
                         Se connecter
                     </button>
                 </div>

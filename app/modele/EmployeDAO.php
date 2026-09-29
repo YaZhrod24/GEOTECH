@@ -10,12 +10,25 @@ class EmployeDAO extends PDO_Connexion
         $this->db = $this->getConnection();
     }
 
-    public function login()
+    public function login($email, $password)
     {
-        $stmt = $this->db->prepare("SELECT * FROM employe");
+        $stmt = $this->db->prepare("SELECT * FROM employes WHERE email = :email LIMIT 1");
+        $stmt->bindValue(":email", $email, PDO::PARAM_STR);
         $stmt->execute();
 
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            if (password_verify($password, $result["mdp"])) {
+                return $this->hydrater($result);
+            } else {
+                return "Mot de passe incorrect."; // Mot de passe incorrect
+            }
+
+        } else {
+            return "Aucun employé trouvé avec cet email."; // Aucun employé trouvé
+        }
+
 
         $employe = [];
         foreach ($result as $ligne) {
@@ -27,6 +40,7 @@ class EmployeDAO extends PDO_Connexion
 
     private function hydrater(array $ligne): Employe
     {
+        require_once Racine . '/../app/modele/Employe.php';
         return new Employe(
             (int) $ligne['id_employe'],
             (string) $ligne['nom'],
