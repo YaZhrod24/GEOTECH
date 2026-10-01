@@ -32,7 +32,7 @@
                             <span class="text-secondary fs-6" style="font-family: 'Titan One', cursive; letter-spacing: 1px;">
                                 Béta
                             </span>
-                            1.1.4
+                            1.15
                         </span>
                     </div>
                 </div>
