@@ -30,9 +30,9 @@
                         <!-- Rendu identique à l'image avec Titan One -->
                         <span class="text-geotech fs-4" style="font-family: 'Titan One', cursive; letter-spacing: 1px;">
                             <span class="text-secondary fs-6" style="font-family: 'Titan One', cursive; letter-spacing: 1px;">
-                                Béta
+                                Alpha
                             </span>
-                            1.15
+                            v0.1.1
                         </span>
                     </div>
                 </div>
