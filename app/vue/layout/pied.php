@@ -18,7 +18,7 @@
                         <a href="/support" class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover small fw-semibold">
                             Support technique
                         </a>
-                        <a href="/cgu" class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover small fw-semibold">
+                        <a href="index.php?action=cgu" class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover small fw-semibold">
                             CGU
                         </a>
                         <a href="/confidentialite" class="link-secondary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover small fw-semibold">
@@ -32,7 +32,7 @@
                             <span class="text-secondary fs-6" style="font-family: 'Titan One', cursive; letter-spacing: 1px;">
                                 Alpha
                             </span>
-                            v0.1.1
+                            v0.1.2-1
                         </span>
                     </div>
                 </div>
