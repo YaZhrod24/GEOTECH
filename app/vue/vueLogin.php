@@ -16,7 +16,8 @@
         <div
             class="col-md-5 d-none d-md-flex flex-column justify-content-between p-5 text-white bg-primary position-relative">
             <div>
-                <span class="badge bg-light text-dark mb-3 px-3 py-2 rounded-pill fw-semibold">-- Futur logo --</span>
+                <span class="badge bg-light text-dark mb-3 px-3 py-2 rounded-pill fw-semibold"><img
+                        src="/img/logo_l.svg" alt="Logo Geotech" width="50px"></span>
                 <h2 class="fw-bold display-6">Geotech</h2>
                 <p class="text-white-50 mt-2">Accès manager à la gestion des interventions.
                 </p>

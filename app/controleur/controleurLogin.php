@@ -58,6 +58,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
 // appel du script de vue qui permet de gerer l'affichage des donnees
 
-require_once Racine . '/../app/vue/layout/entete.php';
-require_once Racine . '/../app/vue/vueLogin.php';
-require_once Racine . '/../app/vue/layout/pied.php';
+?>
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= isset($titre) ? $titre : 'Geotech Manager'; ?></title>
+    <link rel="stylesheet" href="/CSS/custom.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Titan+One&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <?php
+    require_once Racine . '/../app/vue/vueLogin.php';
+    ?>
+</body>
+
+</html>

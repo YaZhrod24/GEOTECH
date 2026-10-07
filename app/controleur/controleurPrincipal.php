@@ -4,11 +4,6 @@ class ControleurPrincipal
 {
     public function gererRequete()
     {
-        if (isset($_GET['action']) && $_GET['action'] == 'cgu') {
-            require_once Racine . '/../app/vue/cgu.php';
-            return;
-        }
-        
         // Récupère l'URL demandée, ex : "/utilisateur/15?test=1"
         $url = $_SERVER['REQUEST_URI'];
 
@@ -31,7 +26,6 @@ class ControleurPrincipal
             'utilisateur/{id}' => 'afficherUtilisateur',
             'utilisateur/{id}/modifier' => 'modifierUtilisateur',
             'utilisateur/{id}/supprimer' => 'supprimerUtilisateur',
-            'connexion' => 'connexion',
             'cgu' => 'cgu'
         ];
 
@@ -115,11 +109,6 @@ class ControleurPrincipal
         echo "Supprimer utilisateur numéro " . $id;
     }
 
-
-    private function connexion()
-    {
-        echo "Page de connexion";
-    }
 
     private function cgu()
     {
