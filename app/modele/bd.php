@@ -6,6 +6,7 @@ class PDO_Connexion
     private string $dbname;
     private string $username;
     private string $password;
+    // ? devant pdo car quand il n'est pas encore connecté il est null
     private ?PDO $conn = null;
 
     public function getConnection(): PDO
@@ -14,7 +15,7 @@ class PDO_Connexion
 
             // Initialisation ici au lieu du constructeur
             $this->host = 'localhost';
-            $this->dbname = 'basededonness';
+            $this->dbname = 'geotech';
             $this->username = 'root';
             $this->password = '';
 

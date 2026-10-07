@@ -26,6 +26,7 @@ class ControleurPrincipal
         // {id} représente un integer
         $routes = [
             '' => 'dashboard',
+            'dashboard' => 'dashboard',
             'login' => 'login',
             'utilisateur/{id}' => 'afficherUtilisateur',
             'utilisateur/{id}/modifier' => 'modifierUtilisateur',
@@ -57,6 +58,12 @@ class ControleurPrincipal
 
                 // Appelle la méthode dans la classe correspondant à la route
                 // Ex : "afficherUtilisateur" + 15 -> afficherUtilisateur(15)
+                if ($action !== 'login' && empty($_SESSION['user_id'])) {
+                    $_SESSION['url_apres_login'] = $_SERVER['REQUEST_URI'];
+                    $this->login();
+                    return;
+                }
+
                 $this->$action($parametre);
 
                 // Route trouvée : inutile de continuer la boucle
@@ -84,6 +91,9 @@ class ControleurPrincipal
     private function login()
     {
         $titre = "Connexion - Geotech";
+
+        require_once Racine . '/../app/modele/bd.php';
+
         require_once Racine . '/../app/controleur/controleurLogin.php';
     }
 

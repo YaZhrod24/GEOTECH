@@ -1,9 +1,20 @@
 <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light">
+
+    <!-- Popup d'erreur  -->
+    <?php if (isset($error)): ?>
+        <div class="alert alert-danger alert-dismissible fade show position-absolute top-0 start-50 translate-middle-x mt-3"
+            role="alert" style="z-index: 1050;">
+            <strong>Erreur !</strong>
+            <?= htmlspecialchars($error) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="row w-100 shadow-lg rounded-4 overflow-hidden bg-white" style="max-width: 900px;">
 
         <!-- Left Side: Atypical Brand/Visual Panel -->
-        <div class="col-md-5 d-none d-md-flex flex-column justify-content-between p-5 text-white position-relative"
-            style="background: linear-gradient(135deg, #1b4d3e 0%, #112d23 100%);">
+        <div
+            class="col-md-5 d-none d-md-flex flex-column justify-content-between p-5 text-white bg-primary position-relative">
             <div>
                 <span class="badge bg-light text-dark mb-3 px-3 py-2 rounded-pill fw-semibold">-- Futur logo --</span>
                 <h2 class="fw-bold display-6">Geotech</h2>
@@ -23,7 +34,7 @@
             </div>
 
             <!-- Formulaire pointant vers votre route MVC -->
-            <form action="/auth/login" method="POST">
+            <form action="" method="POST">
 
                 <div class="form-floating mb-3">
                     <input type="email" class="form-control rounded-3" id="email" name="email"
@@ -38,7 +49,7 @@
                 </div>
 
                 <div class="d-grid">
-                    <button type="submit" class="btn btn-dark btn-lg rounded-3 fw-semibold py-3">
+                    <button type="submit" name="login" class="btn btn-dark btn-lg rounded-3 fw-semibold py-3">
                         Se connecter
                     </button>
                 </div>
