@@ -36,7 +36,7 @@
                     <span class="text-secondary fs-6" style="font-family: 'Titan One', cursive; letter-spacing: 1px;">
                         Alpha
                     </span>
-                    v0.1.2-3
+                    v0.2.0
                 </span>
             </div>
         </div>
