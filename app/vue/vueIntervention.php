@@ -2,8 +2,16 @@
 $escape = static function ($value): string {
     return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 };
-$formatDate = static function ($value): string {
-    return $value ? date('d/m/Y H:i', strtotime($value)) : '—';
+$fuseauUtc = new DateTimeZone('UTC');
+$fuseauParis = new DateTimeZone('Europe/Paris');
+$formatDate = static function ($value) use ($fuseauUtc, $fuseauParis): string {
+    if (!$value) {
+        return '—';
+    }
+
+    return (new DateTimeImmutable($value, $fuseauUtc))
+        ->setTimezone($fuseauParis)
+        ->format('d/m/Y H:i');
 };
 ?>
 <div class="container-fluid px-0">
@@ -157,7 +165,7 @@ $formatDate = static function ($value): string {
                         class="form-control"
                         id="creationDate"
                         name="date_intervention"
-                        value="<?= $escape($valeursFormulaire['date_intervention'] ?? date('Y-m-d\TH:i')) ?>"
+                        value="<?= $escape($valeursFormulaire['date_intervention'] ?? (new DateTimeImmutable('now', $fuseauParis))->format('Y-m-d\TH:i')) ?>"
                         required>
                 </div>
                 <div class="mb-3">

@@ -105,7 +105,7 @@ class InterventionDAO extends PDO_Connexion
             UPDATE interventions
             SET statut = :statut,
                 date_cloture = CASE
-                    WHEN :statut_cloture = 'CLOTUREE' THEN CURRENT_TIMESTAMP
+                    WHEN :statut_cloture = 'CLOTUREE' THEN UTC_TIMESTAMP()
                     ELSE NULL
                 END
             WHERE id_intervention = :id

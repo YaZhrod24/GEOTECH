@@ -1,4 +1,5 @@
 <div class="container-fluid px-4 mt-4">
+    <?php $fuseauParis = new DateTimeZone('Europe/Paris'); ?>
     <!-- En-tête avec titre et bouton d'action -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -91,7 +92,7 @@
                             <?php foreach ($interventionsDuJour as $intervention): ?>
                                 <tr>
                                     <td class="fw-bold">
-                                        <?= htmlspecialchars(date('H:i', strtotime($intervention->getDateIntervention())), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
+                                        <?= htmlspecialchars((new DateTimeImmutable($intervention->getDateIntervention(), new DateTimeZone('UTC')))->setTimezone($fuseauParis)->format('H:i'), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
                                     </td>
                                     <td><?= htmlspecialchars((string) $intervention->getClient(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
                                     </td>
