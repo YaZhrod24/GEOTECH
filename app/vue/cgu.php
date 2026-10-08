@@ -9,7 +9,7 @@ require_once Racine . '/../app/vue/layout/entete.php';
             <div class="card shadow-sm border-0">
                 <div class="card-body p-5">
                     <div class="text-center mb-5">
-                        <img src="/Ecole/GEOTECH/SITE/MANAGER/public/img/logo.svg" alt="Logo" height="60" class="mb-3">
+                        <img src="img/logo.svg" alt="Logo" height="60" class="mb-3">
                         <h1 class="fw-bold">Conditions Générales d'Utilisation</h1>
                         <p class="text-muted">Application MANAGER</p>
                     </div>
@@ -39,7 +39,7 @@ require_once Racine . '/../app/vue/layout/entete.php';
                     </div>
 
                     <div class="mt-5 text-center">
-                        <a href="index.php" class="btn btn-primary px-4">Retour à l'accueil</a>
+                        <a href="/" class="btn btn-primary px-4">Retour à l'accueil</a>
                     </div>
                 </div>
             </div>
