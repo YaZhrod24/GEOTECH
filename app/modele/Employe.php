@@ -46,5 +46,9 @@ class Employe
         return $this->role;
     }
 
-    // Faire plus tard les setter si besoin
+    public static function getTechniciens(): array
+    {
+        require_once Racine . '/../app/modele/EmployeDAO.php';
+        return (new EmployeDAO())->getTechniciens();
+    }
 }

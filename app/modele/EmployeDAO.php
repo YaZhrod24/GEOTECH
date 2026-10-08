@@ -42,6 +42,25 @@ class EmployeDAO extends PDO_Connexion
         return $employe;
     }
 
+    public function getTechniciens(): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT id_employe, nom, prenom, role
+            FROM employes
+            WHERE role = :role
+            ORDER BY nom, prenom
+        ");
+        $stmt->bindValue(':role', 'TECHNICIEN', PDO::PARAM_STR);
+        $stmt->execute();
+
+        $techniciens = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $ligne) {
+            $techniciens[] = $this->hydrater($ligne);
+        }
+
+        return $techniciens;
+    }
+
     private function hydrater(array $ligne): Employe
     {
         require_once Racine . '/../app/modele/Employe.php';
@@ -49,9 +68,9 @@ class EmployeDAO extends PDO_Connexion
             (int) $ligne['id_employe'],
             (string) $ligne['nom'],
             (string) $ligne['prenom'],
-            (string) $ligne['email'],
-            (string) $ligne['mdp'],
-            (string) $ligne['tel'],
+            (string) ($ligne['email'] ?? ''),
+            (string) ($ligne['mdp'] ?? ''),
+            (string) ($ligne['tel'] ?? ''),
             (string) $ligne['role'],
         );
     }

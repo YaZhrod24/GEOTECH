@@ -7,14 +7,16 @@ class Equipement
     private $type;
     private $numSerie;
     private $id_client;
+    private $client;
 
-    public function __construct($id, $nom, $type, $numSerie, $id_client)
+    public function __construct($id, $nom, $type, $numSerie, $id_client, $client = null)
     {
         $this->id = $id;
         $this->nom = $nom;
         $this->type = $type;
         $this->numSerie = $numSerie;
         $this->id_client = $id_client;
+        $this->client = $client;
     }
 
     public function getId()
@@ -37,6 +39,14 @@ class Equipement
     {
         return $this->id_client;
     }
+    public function getClient()
+    {
+        return $this->client;
+    }
 
-    // Faire plus tard les setter si besoin
+    public static function getAll(): array
+    {
+        require_once Racine . '/../app/modele/EquipementsDAO.php';
+        return (new EquipementDAO())->getAll();
+    }
 }

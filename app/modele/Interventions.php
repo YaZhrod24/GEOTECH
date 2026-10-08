@@ -10,6 +10,12 @@ class Intervention
     private $rapport;
     private $idEquipement;
     private $idEmploye;
+    private $client;
+    private $nomEquipement;
+    private $typeEquipement;
+    private $numSerie;
+    private $technicienNom;
+    private $technicienPrenom;
 
     public function __construct($id, $descPanne, $dateIntervention, $dateCloture, $statut, $rapport, $idEquipement, $idEmploye)
     {
@@ -39,6 +45,14 @@ class Intervention
     {
         return $this->dateCloture;
     }
+    public function getStatut()
+    {
+        return $this->statut;
+    }
+    public function getRapport()
+    {
+        return $this->rapport;
+    }
     public function getIdEquipement()
     {
         return $this->idEquipement;
@@ -48,5 +62,103 @@ class Intervention
         return $this->idEmploye;
     }
 
-    // Faire plus tard les setter si besoin
+    public function setInformationsAssociees(array $ligne): void
+    {
+        $this->client = $ligne['client'];
+        $this->nomEquipement = $ligne['equipement'];
+        $this->typeEquipement = $ligne['type_equipement'];
+        $this->numSerie = $ligne['num_serie'];
+        $this->technicienNom = $ligne['technicien_nom'];
+        $this->technicienPrenom = $ligne['technicien_prenom'];
+    }
+
+    public function getClient()
+    {
+        return $this->client;
+    }
+    public function getNomEquipement()
+    {
+        return $this->nomEquipement;
+    }
+    public function getTypeEquipement()
+    {
+        return $this->typeEquipement;
+    }
+    public function getNumSerie()
+    {
+        return $this->numSerie;
+    }
+    public function getTechnicienNom()
+    {
+        return $this->technicienNom;
+    }
+    public function getTechnicienPrenom()
+    {
+        return $this->technicienPrenom;
+    }
+
+    public function setDescPanne(string $descPanne): void
+    {
+        $this->descPanne = $descPanne;
+    }
+
+    public function setDateIntervention(string $dateIntervention): void
+    {
+        $this->dateIntervention = $dateIntervention;
+    }
+
+    public function setDateCloture(?string $dateCloture): void
+    {
+        $this->dateCloture = $dateCloture;
+    }
+
+    public function setStatut(string $statut): void
+    {
+        $this->statut = $statut;
+    }
+
+    public function setRapport(?string $rapport): void
+    {
+        $this->rapport = $rapport;
+    }
+
+    public function setIdEquipement(int $idEquipement): void
+    {
+        $this->idEquipement = $idEquipement;
+    }
+
+    public function setIdEmploye(int $idEmploye): void
+    {
+        $this->idEmploye = $idEmploye;
+    }
+
+    public static function getAll(): array
+    {
+        require_once Racine . '/../app/modele/InterventionsDAO.php';
+        return (new InterventionDAO())->getAll();
+    }
+
+    public static function getById(int $id): ?Intervention
+    {
+        require_once Racine . '/../app/modele/InterventionsDAO.php';
+        return (new InterventionDAO())->getById($id);
+    }
+
+    public function creer(): void
+    {
+        require_once Racine . '/../app/modele/InterventionsDAO.php';
+        (new InterventionDAO())->creer($this);
+    }
+
+    public function enregistrerStatut(): bool
+    {
+        require_once Racine . '/../app/modele/InterventionsDAO.php';
+        return (new InterventionDAO())->modifierStatut($this);
+    }
+
+    public function enregistrerInformations(): bool
+    {
+        require_once Racine . '/../app/modele/InterventionsDAO.php';
+        return (new InterventionDAO())->modifierInformations($this);
+    }
 }
