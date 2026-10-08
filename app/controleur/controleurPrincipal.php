@@ -22,8 +22,9 @@ class ControleurPrincipal
         $routes = [
             '' => 'dashboard',
             'dashboard' => 'dashboard',
+            'clients' => 'clients',
+            'equipements' => 'equipements',
             'login' => 'login',
-            'interventions/nouvelle' => 'nouvelleIntervention',
             'utilisateur/{id}' => 'afficherUtilisateur',
             'utilisateur/{id}/modifier' => 'modifierUtilisateur',
             'utilisateur/{id}/supprimer' => 'supprimerUtilisateur',
@@ -137,15 +138,26 @@ class ControleurPrincipal
         require_once Racine . '/../app/vue/vuePlanning.php';
     }
 
-    private function nouvelleIntervention()
+    private function clients()
     {
-        $titre = "Planifier une intervention - Geotech";
-        // En attendant de créer le fichier contrôleur dédié, tu pourras inclure ta vue ou ton contrôleur ici :
-        // require_once Racine . '/../app/controleur/controleurNouvelleIntervention.php';
+        $titre = "Gestion des Clients - Geotech";
+        require_once Racine . '/../app/controleur/controleurClients.php';
         
-        // Pour l'instant, pour éviter la 404 le temps que tu créées la vue :
+        // En attendant de créer ton contrôleur et ta vue dédiée :
         require_once Racine . '/../app/vue/layout/entete.php';
-        echo "<div class='container mt-4'><h2>Page de création d'intervention en cours de développement...</h2></div>";
+        echo "<div class='container mt-4'><h2>Module Clients en cours de développement...</h2></div>";
         require_once Racine . '/../app/vue/layout/pied.php';
     }
+
+    private function equipements()
+    {
+        $titre = "Gestion des Équipements - Geotech";
+        // require_once Racine . '/../app/controleur/controleurEquipements.php';
+        
+        // En attendant de créer ton contrôleur et ta vue dédiée :
+        require_once Racine . '/../app/vue/layout/entete.php';
+        echo "<div class='container mt-4'><h2>Module Équipements en cours de développement...</h2></div>";
+        require_once Racine . '/../app/vue/layout/pied.php';
+    }
+
 }
