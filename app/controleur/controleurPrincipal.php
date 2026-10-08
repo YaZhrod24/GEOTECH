@@ -30,7 +30,11 @@ class ControleurPrincipal
             'confidentialite' => 'confidentialite',
             'support' => 'support',
             'planning' => 'planning',
-            'planning/events' => 'planningEvents'
+            'planning/events' => 'planningEvents',
+            'techniciens' => 'techniciens',
+            'techniciens/nouveau' => 'nouveauTechnicien',
+            'techniciens/{id}/modifier' => 'modifierTechnicien',
+            'techniciens/{id}/supprimer' => 'supprimerTechnicien'
         ];
 
         // Parcourt toutes les routes pour trouver celle qui correspond à l'URL
@@ -193,6 +197,123 @@ class ControleurPrincipal
 
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode($events);
+    }
+
+    private function techniciens()
+    {
+        $titre = "Techniciens - Geotech";
+        require_once Racine . '/../app/modele/bd.php';
+
+        $connexion = new PDO_Connexion();
+        $db = $connexion->getConnection();
+        $requete = $db->query(
+            "SELECT id_employe, nom, prenom, email, tel
+             FROM employes
+             WHERE role = 'TECHNICIEN'
+             ORDER BY nom, prenom"
+        );
+        $techniciens = $requete->fetchAll();
+
+        require_once Racine . '/../app/vue/vueTechnicien.php';
+    }
+
+    private function nouveauTechnicien()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /techniciens');
+            return;
+        }
+
+        require_once Racine . '/../app/modele/bd.php';
+        $nom = trim($_POST['nom'] ?? '');
+        $prenom = trim($_POST['prenom'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $tel = trim($_POST['tel'] ?? '');
+        $mdp = $_POST['mdp'] ?? '';
+
+        if ($nom === '' || $prenom === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || $mdp === '') {
+            $_SESSION['technicien_erreur'] = 'Nom, prénom, email et mot de passe sont obligatoires.';
+            header('Location: /techniciens');
+            return;
+        }
+
+        $connexion = new PDO_Connexion();
+        $db = $connexion->getConnection();
+        $requete = $db->prepare(
+            'INSERT INTO employes (nom, prenom, email, mdp, tel, role)
+             VALUES (:nom, :prenom, :email, :mdp, :tel, "TECHNICIEN")'
+        );
+        $requete->execute([
+            'nom' => $nom,
+            'prenom' => $prenom,
+            'email' => $email,
+            'mdp' => password_hash($mdp, PASSWORD_DEFAULT),
+            'tel' => $tel !== '' ? $tel : null
+        ]);
+
+        header('Location: /techniciens');
+    }
+
+    private function modifierTechnicien($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /techniciens');
+            return;
+        }
+
+        require_once Racine . '/../app/modele/bd.php';
+        $nom = trim($_POST['nom'] ?? '');
+        $prenom = trim($_POST['prenom'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $tel = trim($_POST['tel'] ?? '');
+        $mdp = $_POST['mdp'] ?? '';
+
+        if ($nom === '' || $prenom === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['technicien_erreur'] = 'Nom, prénom et email valides sont obligatoires.';
+            header('Location: /techniciens');
+            return;
+        }
+
+        $connexion = new PDO_Connexion();
+        $db = $connexion->getConnection();
+        $champs = 'nom = :nom, prenom = :prenom, email = :email, tel = :tel';
+        $parametres = [
+            'id' => (int) $id,
+            'nom' => $nom,
+            'prenom' => $prenom,
+            'email' => $email,
+            'tel' => $tel !== '' ? $tel : null
+        ];
+
+        if ($mdp !== '') {
+            $champs .= ', mdp = :mdp';
+            $parametres['mdp'] = password_hash($mdp, PASSWORD_DEFAULT);
+        }
+
+        $requete = $db->prepare(
+            "UPDATE employes SET $champs WHERE id_employe = :id AND role = 'TECHNICIEN'"
+        );
+        $requete->execute($parametres);
+
+        header('Location: /techniciens');
+    }
+
+    private function supprimerTechnicien($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /techniciens');
+            return;
+        }
+
+        require_once Racine . '/../app/modele/bd.php';
+        $connexion = new PDO_Connexion();
+        $db = $connexion->getConnection();
+        $requete = $db->prepare(
+            "DELETE FROM employes WHERE id_employe = :id AND role = 'TECHNICIEN'"
+        );
+        $requete->execute(['id' => (int) $id]);
+
+        header('Location: /techniciens');
     }
 
     private function datePourRequete(string $date): ?string
