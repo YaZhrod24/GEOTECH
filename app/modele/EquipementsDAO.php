@@ -36,6 +36,55 @@ class EquipementDAO extends PDO_Connexion
         return $equipements;
     }
 
+    public function creer(Equipement $equipement): bool
+    {
+        $statement = $this->db->prepare("
+            INSERT INTO equipements (nom, type, num_serie, id_client)
+            VALUES (:nom, :type, :num_serie, :id_client)
+        ");
+        $statement->bindValue(':nom', $equipement->getNom(), PDO::PARAM_STR);
+        $statement->bindValue(':type', $equipement->getType(), PDO::PARAM_STR);
+        $statement->bindValue(':num_serie', $equipement->getNumSerie(), PDO::PARAM_STR);
+        $statement->bindValue(':id_client', $equipement->getIdClient(), PDO::PARAM_INT);
+
+        return $statement->execute();
+    }
+
+    public function modifier(Equipement $equipement): bool
+    {
+        $statement = $this->db->prepare("
+            UPDATE equipements
+            SET nom = :nom, type = :type, num_serie = :num_serie, id_client = :id_client
+            WHERE id_equipement = :id
+        ");
+        $statement->bindValue(':nom', $equipement->getNom(), PDO::PARAM_STR);
+        $statement->bindValue(':type', $equipement->getType(), PDO::PARAM_STR);
+        $statement->bindValue(':num_serie', $equipement->getNumSerie(), PDO::PARAM_STR);
+        $statement->bindValue(':id_client', $equipement->getIdClient(), PDO::PARAM_INT);
+        $statement->bindValue(':id', $equipement->getId(), PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->rowCount() > 0 || $this->existe((int) $equipement->getId());
+    }
+
+    public function supprimer(int $id): bool
+    {
+        $statement = $this->db->prepare('DELETE FROM equipements WHERE id_equipement = :id');
+        $statement->bindValue(':id', $id, PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->rowCount() > 0;
+    }
+
+    private function existe(int $id): bool
+    {
+        $statement = $this->db->prepare('SELECT 1 FROM equipements WHERE id_equipement = :id LIMIT 1');
+        $statement->bindValue(':id', $id, PDO::PARAM_INT);
+        $statement->execute();
+
+        return $statement->fetchColumn() !== false;
+    }
+
     private function hydrater(array $ligne): Equipement
     {
         require_once Racine . '/../app/modele/Equipements.php';

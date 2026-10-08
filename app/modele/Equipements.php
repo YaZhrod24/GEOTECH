@@ -44,6 +44,24 @@ class Equipement
         return $this->client;
     }
 
+    public function creer(): bool
+    {
+        require_once Racine . '/../app/modele/EquipementsDAO.php';
+        return (new EquipementDAO())->creer($this);
+    }
+
+    public function modifier(): bool
+    {
+        require_once Racine . '/../app/modele/EquipementsDAO.php';
+        return (new EquipementDAO())->modifier($this);
+    }
+
+    public function supprimer(): bool
+    {
+        require_once Racine . '/../app/modele/EquipementsDAO.php';
+        return (new EquipementDAO())->supprimer((int) $this->id);
+    }
+
     public static function getAll(): array
     {
         require_once Racine . '/../app/modele/EquipementsDAO.php';

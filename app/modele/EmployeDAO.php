@@ -45,7 +45,7 @@ class EmployeDAO extends PDO_Connexion
     public function getTechniciens(): array
     {
         $stmt = $this->db->prepare("
-            SELECT id_employe, nom, prenom, role
+            SELECT id_employe, nom, prenom, email, tel, role
             FROM employes
             WHERE role = :role
             ORDER BY nom, prenom
@@ -59,6 +59,78 @@ class EmployeDAO extends PDO_Connexion
         }
 
         return $techniciens;
+    }
+
+    public function creerTechnicien(Employe $technicien, string $motDePasseHash): void
+    {
+        $statement = $this->db->prepare("
+            INSERT INTO employes (nom, prenom, email, mdp, tel, role)
+            VALUES (:nom, :prenom, :email, :mdp, :tel, :role)
+        ");
+        $statement->bindValue(':nom', $technicien->getNom(), PDO::PARAM_STR);
+        $statement->bindValue(':prenom', $technicien->getPrenom(), PDO::PARAM_STR);
+        $statement->bindValue(':email', $technicien->getEmail(), PDO::PARAM_STR);
+        $statement->bindValue(':mdp', $motDePasseHash, PDO::PARAM_STR);
+        $statement->bindValue(':tel', $technicien->getTel(), $technicien->getTel() === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        $statement->bindValue(':role', 'TECHNICIEN', PDO::PARAM_STR);
+        $statement->execute();
+    }
+
+    public function modifierTechnicien(Employe $technicien, ?string $motDePasseHash): bool
+    {
+        if ($motDePasseHash === null) {
+            $statement = $this->db->prepare("
+                UPDATE employes
+                SET nom = :nom, prenom = :prenom, email = :email, tel = :tel
+                WHERE id_employe = :id AND role = :role
+            ");
+        } else {
+            $statement = $this->db->prepare("
+                UPDATE employes
+                SET nom = :nom, prenom = :prenom, email = :email, tel = :tel, mdp = :mdp
+                WHERE id_employe = :id AND role = :role
+            ");
+            $statement->bindValue(':mdp', $motDePasseHash, PDO::PARAM_STR);
+        }
+
+        $statement->bindValue(':nom', $technicien->getNom(), PDO::PARAM_STR);
+        $statement->bindValue(':prenom', $technicien->getPrenom(), PDO::PARAM_STR);
+        $statement->bindValue(':email', $technicien->getEmail(), PDO::PARAM_STR);
+        $statement->bindValue(':tel', $technicien->getTel(), $technicien->getTel() === null ? PDO::PARAM_NULL : PDO::PARAM_STR);
+        $statement->bindValue(':id', $technicien->getId(), PDO::PARAM_INT);
+        $statement->bindValue(':role', 'TECHNICIEN', PDO::PARAM_STR);
+        $statement->execute();
+
+        return $statement->rowCount() > 0 || $this->getTechnicienById($technicien->getId()) !== null;
+    }
+
+    public function supprimerTechnicien(int $id): bool
+    {
+        $statement = $this->db->prepare("
+            DELETE FROM employes
+            WHERE id_employe = :id AND role = :role
+        ");
+        $statement->bindValue(':id', $id, PDO::PARAM_INT);
+        $statement->bindValue(':role', 'TECHNICIEN', PDO::PARAM_STR);
+        $statement->execute();
+
+        return $statement->rowCount() > 0;
+    }
+
+    private function getTechnicienById(int $id): ?Employe
+    {
+        $statement = $this->db->prepare("
+            SELECT id_employe, nom, prenom, email, tel, role
+            FROM employes
+            WHERE id_employe = :id AND role = :role
+            LIMIT 1
+        ");
+        $statement->bindValue(':id', $id, PDO::PARAM_INT);
+        $statement->bindValue(':role', 'TECHNICIEN', PDO::PARAM_STR);
+        $statement->execute();
+        $ligne = $statement->fetch(PDO::FETCH_ASSOC);
+
+        return $ligne === false ? null : $this->hydrater($ligne);
     }
 
     private function hydrater(array $ligne): Employe

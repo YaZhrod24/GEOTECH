@@ -36,47 +36,47 @@ unset($_SESSION['technicien_erreur']);
                     <tbody>
                         <?php foreach ($techniciens as $technicien): ?>
                             <tr>
-                                <td><?= (int) $technicien['id_employe'] ?></td>
-                                <td><?= htmlspecialchars($technicien['nom'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($technicien['prenom'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= (int) $technicien->getId() ?></td>
+                                <td><?= htmlspecialchars($technicien->getNom(), ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= htmlspecialchars($technicien->getPrenom(), ENT_QUOTES, 'UTF-8') ?></td>
                                 <td>
-                                    <a href="mailto:<?= htmlspecialchars($technicien['email'], ENT_QUOTES, 'UTF-8') ?>">
-                                        <?= htmlspecialchars($technicien['email'], ENT_QUOTES, 'UTF-8') ?>
+                                    <a href="mailto:<?= htmlspecialchars($technicien->getEmail(), ENT_QUOTES, 'UTF-8') ?>">
+                                        <?= htmlspecialchars($technicien->getEmail(), ENT_QUOTES, 'UTF-8') ?>
                                     </a>
                                 </td>
-                                <td><?= htmlspecialchars($technicien['tel'] ?? 'Non renseigné', ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= htmlspecialchars($technicien->getTel() ?: 'Non renseigné', ENT_QUOTES, 'UTF-8') ?></td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group" aria-label="Actions du technicien">
                                         <button type="button" class="btn btn-outline-secondary btn-details-technicien"
                                             data-bs-toggle="modal" data-bs-target="#technicienDetailsModal"
-                                            data-id="<?= (int) $technicien['id_employe'] ?>"
-                                            data-nom="<?= htmlspecialchars($technicien['nom'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-prenom="<?= htmlspecialchars($technicien['prenom'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-email="<?= htmlspecialchars($technicien['email'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-tel="<?= htmlspecialchars($technicien['tel'] ?? 'Non renseigné', ENT_QUOTES, 'UTF-8') ?>">
+                                            data-id="<?= (int) $technicien->getId() ?>"
+                                            data-nom="<?= htmlspecialchars($technicien->getNom(), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-prenom="<?= htmlspecialchars($technicien->getPrenom(), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-email="<?= htmlspecialchars($technicien->getEmail(), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-tel="<?= htmlspecialchars($technicien->getTel() ?: 'Non renseigné', ENT_QUOTES, 'UTF-8') ?>">
                                             <i class="bi bi-eye" aria-hidden="true"></i>
                                             <span class="visually-hidden">Voir</span>
                                         </button>
                                         <button type="button" class="btn btn-outline-primary btn-edit-technicien"
                                             data-bs-toggle="modal" data-bs-target="#technicienFormModal"
-                                            data-id="<?= (int) $technicien['id_employe'] ?>"
-                                            data-nom="<?= htmlspecialchars($technicien['nom'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-prenom="<?= htmlspecialchars($technicien['prenom'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-email="<?= htmlspecialchars($technicien['email'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-tel="<?= htmlspecialchars($technicien['tel'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                                            data-id="<?= (int) $technicien->getId() ?>"
+                                            data-nom="<?= htmlspecialchars($technicien->getNom(), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-prenom="<?= htmlspecialchars($technicien->getPrenom(), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-email="<?= htmlspecialchars($technicien->getEmail(), ENT_QUOTES, 'UTF-8') ?>"
+                                            data-tel="<?= htmlspecialchars($technicien->getTel() ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                             <i class="bi bi-pencil" aria-hidden="true"></i>
                                             <span class="visually-hidden">Modifier</span>
                                         </button>
                                         <button type="button" class="btn btn-outline-info btn-history-technicien"
                                             data-bs-toggle="modal" data-bs-target="#technicienHistoryModal"
-                                            data-nom="<?= htmlspecialchars($technicien['prenom'] . ' ' . $technicien['nom'], ENT_QUOTES, 'UTF-8') ?>">
+                                            data-nom="<?= htmlspecialchars($technicien->getPrenom() . ' ' . $technicien->getNom(), ENT_QUOTES, 'UTF-8') ?>">
                                             <i class="bi bi-clock-history" aria-hidden="true"></i>
                                             <span class="visually-hidden">Historique</span>
                                         </button>
                                         <button type="button" class="btn btn-outline-danger btn-delete-technicien"
                                             data-bs-toggle="modal" data-bs-target="#deleteTechnicienModal"
-                                            data-id="<?= (int) $technicien['id_employe'] ?>"
-                                            data-nom="<?= htmlspecialchars($technicien['prenom'] . ' ' . $technicien['nom'], ENT_QUOTES, 'UTF-8') ?>">
+                                            data-id="<?= (int) $technicien->getId() ?>"
+                                            data-nom="<?= htmlspecialchars($technicien->getPrenom() . ' ' . $technicien->getNom(), ENT_QUOTES, 'UTF-8') ?>">
                                             <i class="bi bi-trash" aria-hidden="true"></i>
                                             <span class="visually-hidden">Supprimer</span>
                                         </button>
@@ -146,9 +146,6 @@ unset($_SESSION['technicien_erreur']);
             </div>
             <form action="/techniciens/nouveau" method="post" id="technicienForm">
                 <div class="modal-body">
-                    <p class="alert alert-info small">
-                        Le formulaire est prêt pour être relié aux actions de création et de modification.
-                    </p>
                     <input type="hidden" name="id_employe" id="formId">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -271,7 +268,7 @@ unset($_SESSION['technicien_erreur']);
             button.addEventListener('click', function () {
                 document.getElementById('deleteTechnicienName').textContent = button.dataset.nom;
                 document.getElementById('deleteTechnicienForm').action =
-                    '/technicien/' + button.dataset.id + '/supprimer';
+                    '/techniciens/' + button.dataset.id + '/supprimer';
             });
         });
     });

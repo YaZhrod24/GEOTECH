@@ -144,6 +144,12 @@ class Intervention
         return (new InterventionDAO())->getById($id);
     }
 
+    public static function getPourPlanning(string $debutUtc, string $finUtc): array
+    {
+        require_once Racine . '/../app/modele/InterventionsDAO.php';
+        return (new InterventionDAO())->getPourPeriode($debutUtc, $finUtc);
+    }
+
     public function creer(): void
     {
         require_once Racine . '/../app/modele/InterventionsDAO.php';

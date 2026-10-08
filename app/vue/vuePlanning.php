@@ -8,7 +8,6 @@ require_once Racine . '/../app/vue/layout/entete.php';
             <h1 class="h2 fw-bold mb-1">Planning</h1>
             <p class="text-muted mb-0">Visualisez les interventions planifiées, jour par jour.</p>
         </div>
-        <span class="badge text-bg-success">Planning relié à la base de données</span>
     </div>
 
     <div class="card border-0 shadow-sm">

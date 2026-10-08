@@ -42,44 +42,52 @@ unset($_SESSION['equipement_erreur']);
                     </thead>
                     <tbody>
                         <?php foreach ($equipements as $equipement): ?>
+                            <?php
+                            $nomEquipement = $equipement->getNom();
+                            $typeEquipement = $equipement->getType();
+                            $numeroSerie = $equipement->getNumSerie();
+                            $idEquipement = $equipement->getId();
+                            $idClient = $equipement->getIdClient();
+                            $raisonSociale = $equipement->getClient();
+                            ?>
                             <tr>
-                                <td><?= (int) $equipement['id_equipement'] ?></td>
-                                <td><?= htmlspecialchars($equipement['client'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($equipement['type'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td><?= htmlspecialchars($equipement['num_serie'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= (int) $idEquipement ?></td>
+                                <td><?= htmlspecialchars($raisonSociale, ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= htmlspecialchars($typeEquipement, ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= htmlspecialchars($numeroSerie, ENT_QUOTES, 'UTF-8') ?></td>
                                 <td><span class="badge text-bg-success">Actif</span></td>
                                 <td>
                                     <div class="btn-group btn-group-sm" role="group" aria-label="Actions de l'équipement">
                                         <button type="button" class="btn btn-outline-secondary btn-details-equipement"
                                             data-bs-toggle="modal" data-bs-target="#equipementDetailsModal"
-                                            data-id="<?= (int) $equipement['id_equipement'] ?>"
-                                            data-nom="<?= htmlspecialchars($equipement['nom'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-client="<?= htmlspecialchars($equipement['client'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-type="<?= htmlspecialchars($equipement['type'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-reference="<?= htmlspecialchars($equipement['num_serie'], ENT_QUOTES, 'UTF-8') ?>">
+                                            data-id="<?= (int) $idEquipement ?>"
+                                            data-nom="<?= htmlspecialchars($nomEquipement, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-client="<?= htmlspecialchars($raisonSociale, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-type="<?= htmlspecialchars($typeEquipement, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-reference="<?= htmlspecialchars($numeroSerie, ENT_QUOTES, 'UTF-8') ?>">
                                             <i class="bi bi-eye" aria-hidden="true"></i>
                                             <span class="visually-hidden">Voir</span>
                                         </button>
                                         <button type="button" class="btn btn-outline-primary btn-edit-equipement"
                                             data-bs-toggle="modal" data-bs-target="#equipementFormModal"
-                                            data-id="<?= (int) $equipement['id_equipement'] ?>"
-                                            data-nom="<?= htmlspecialchars($equipement['nom'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-client-id="<?= (int) $equipement['id_client'] ?>"
-                                            data-type="<?= htmlspecialchars($equipement['type'], ENT_QUOTES, 'UTF-8') ?>"
-                                            data-reference="<?= htmlspecialchars($equipement['num_serie'], ENT_QUOTES, 'UTF-8') ?>">
+                                            data-id="<?= (int) $idEquipement ?>"
+                                            data-nom="<?= htmlspecialchars($nomEquipement, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-client-id="<?= (int) $idClient ?>"
+                                            data-type="<?= htmlspecialchars($typeEquipement, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-reference="<?= htmlspecialchars($numeroSerie, ENT_QUOTES, 'UTF-8') ?>">
                                             <i class="bi bi-pencil" aria-hidden="true"></i>
                                             <span class="visually-hidden">Modifier</span>
                                         </button>
                                         <button type="button" class="btn btn-outline-info btn-history-equipement"
                                             data-bs-toggle="modal" data-bs-target="#equipementHistoryModal"
-                                            data-nom="<?= htmlspecialchars($equipement['nom'], ENT_QUOTES, 'UTF-8') ?>">
+                                            data-nom="<?= htmlspecialchars($nomEquipement, ENT_QUOTES, 'UTF-8') ?>">
                                             <i class="bi bi-clock-history" aria-hidden="true"></i>
                                             <span class="visually-hidden">Historique</span>
                                         </button>
                                         <button type="button" class="btn btn-outline-danger btn-delete-equipement"
                                             data-bs-toggle="modal" data-bs-target="#deleteEquipementModal"
-                                            data-id="<?= (int) $equipement['id_equipement'] ?>"
-                                            data-nom="<?= htmlspecialchars($equipement['nom'], ENT_QUOTES, 'UTF-8') ?>">
+                                            data-id="<?= (int) $idEquipement ?>"
+                                            data-nom="<?= htmlspecialchars($nomEquipement, ENT_QUOTES, 'UTF-8') ?>">
                                             <i class="bi bi-trash" aria-hidden="true"></i>
                                             <span class="visually-hidden">Supprimer</span>
                                         </button>
@@ -155,8 +163,8 @@ unset($_SESSION['equipement_erreur']);
                             <select class="form-select" id="formEquipementClient" name="id_client" required>
                                 <option value="">Sélectionner un client</option>
                                 <?php foreach ($clients as $client): ?>
-                                    <option value="<?= (int) $client['id_client'] ?>">
-                                        <?= htmlspecialchars($client['raison_social'], ENT_QUOTES, 'UTF-8') ?>
+                                    <option value="<?= (int) $client->getId() ?>">
+                                        <?= htmlspecialchars($client->getRaisonSociale(), ENT_QUOTES, 'UTF-8') ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>

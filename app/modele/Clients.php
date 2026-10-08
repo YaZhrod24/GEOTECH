@@ -50,6 +50,11 @@ class Client
         return $this->ville;
     }
 
+    public static function getAll(): array
+    {
+        require_once Racine . '/../app/modele/ClientsDAO.php';
+        return (new ClientDAO())->getAll();
+    }
 
     // Faire plus tard les setter si besoin
 }
