@@ -29,7 +29,8 @@ class ControleurPrincipal
             'cgu' => 'cgu',
             'confidentialite' => 'confidentialite',
             'support' => 'support',
-            'planning' => 'planning'
+            'planning' => 'planning',
+            'planning/events' => 'planningEvents'
         ];
 
         // Parcourt toutes les routes pour trouver celle qui correspond à l'URL
@@ -134,5 +135,86 @@ class ControleurPrincipal
     {
         $titre = "Planning - Geotech";
         require_once Racine . '/../app/vue/vuePlanning.php';
+    }
+
+    private function planningEvents()
+    {
+        require_once Racine . '/../app/modele/bd.php';
+
+        $start = $this->datePourRequete($_GET['start'] ?? '');
+        $end = $this->datePourRequete($_GET['end'] ?? '');
+
+        if ($start === null || $end === null) {
+            http_response_code(400);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['error' => 'Période de calendrier invalide.']);
+            return;
+        }
+
+        $connexion = new PDO_Connexion();
+        $db = $connexion->getConnection();
+        $requete = $db->prepare(
+            'SELECT i.id_intervention, i.desc_panne, i.date_intervention, i.date_cloture,
+                    i.statut, e.nom AS equipement, c.raison_social AS client,
+                    CONCAT(emp.prenom, " ", emp.nom) AS technicien
+             FROM interventions i
+             INNER JOIN equipements e ON e.id_equipement = i.id_equipement
+             INNER JOIN clients c ON c.id_client = e.id_client
+             INNER JOIN employes emp ON emp.id_employe = i.id_employe
+             WHERE i.date_intervention >= :start
+               AND i.date_intervention < :end
+             ORDER BY i.date_intervention ASC'
+        );
+        $requete->execute([
+            'start' => $start,
+            'end' => $end
+        ]);
+
+        $events = [];
+        foreach ($requete->fetchAll() as $intervention) {
+            $color = $this->couleurStatut($intervention['statut']);
+            $events[] = [
+                'id' => (string) $intervention['id_intervention'],
+                'title' => $intervention['equipement'],
+                'start' => date(DATE_ATOM, strtotime($intervention['date_intervention'])),
+                'end' => $intervention['date_cloture']
+                    ? date(DATE_ATOM, strtotime($intervention['date_cloture']))
+                    : null,
+                'backgroundColor' => $color,
+                'borderColor' => $color,
+                'extendedProps' => [
+                    'client' => $intervention['client'],
+                    'technicien' => $intervention['technicien'],
+                    'statut' => $intervention['statut'],
+                    'description' => $intervention['desc_panne']
+                ]
+            ];
+        }
+
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($events);
+    }
+
+    private function datePourRequete(string $date): ?string
+    {
+        if ($date === '') {
+            return null;
+        }
+
+        try {
+            return (new DateTime($date))->format('Y-m-d H:i:s');
+        } catch (Exception $exception) {
+            return null;
+        }
+    }
+
+    private function couleurStatut(string $statut): string
+    {
+        return match ($statut) {
+            'CLOTUREE' => '#198754',
+            'ANNULEE' => '#6c757d',
+            'EN COURS' => '#0d6efd',
+            default => '#00bf63'
+        };
     }
 }
