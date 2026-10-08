@@ -26,7 +26,8 @@ class ControleurPrincipal
             'utilisateur/{id}' => 'afficherUtilisateur',
             'utilisateur/{id}/modifier' => 'modifierUtilisateur',
             'utilisateur/{id}/supprimer' => 'supprimerUtilisateur',
-            'cgu' => 'cgu'
+            'cgu' => 'cgu',
+            'confidentialite' => 'confidentialite'
         ];
 
         // Parcourt toutes les routes pour trouver celle qui correspond à l'URL
@@ -113,5 +114,11 @@ class ControleurPrincipal
     private function cgu()
     {
         require_once Racine . '/../app/vue/cgu.php';
+    }
+    
+    private function confidentialite()
+    {
+        $titre = "Confidentialité - Geotech";
+        require_once Racine . '/../app/vue/confidentialite.php';
     }
 }
