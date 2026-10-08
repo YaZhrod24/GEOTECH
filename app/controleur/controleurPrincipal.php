@@ -28,7 +28,8 @@ class ControleurPrincipal
             'utilisateur/{id}/supprimer' => 'supprimerUtilisateur',
             'cgu' => 'cgu',
             'confidentialite' => 'confidentialite',
-            'support' => 'support'
+            'support' => 'support',
+            'planning' => 'planning'
         ];
 
         // Parcourt toutes les routes pour trouver celle qui correspond à l'URL
@@ -127,5 +128,11 @@ class ControleurPrincipal
     {
         $titre = "Support technique - Geotech";
         require_once Racine . '/../app/vue/support.php';
+    }
+
+    private function planning()
+    {
+        $titre = "Planning - Geotech";
+        require_once Racine . '/../app/vue/vuePlanning.php';
     }
 }
