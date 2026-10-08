@@ -12,7 +12,20 @@ $formatDate = static function ($value): string {
             <h1 class="h3 fw-bold mb-1">Interventions</h1>
             <p class="text-muted mb-0">Consultez les interventions et leurs informations.</p>
         </div>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#creationInterventionModal">
+            <i class="bi bi-plus-lg me-1"></i>Nouvelle intervention
+        </button>
     </div>
+
+    <?php if (!empty($message)): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="status">
+            <?= $escape($message) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+        </div>
+    <?php endif; ?>
+    <?php if (!empty($erreur)): ?>
+        <div class="alert alert-danger" role="alert"><?= $escape($erreur) ?></div>
+    <?php endif; ?>
 
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3">
@@ -38,32 +51,31 @@ $formatDate = static function ($value): string {
                     <tbody>
                         <?php foreach ($interventions as $intervention): ?>
                             <?php
-                            $description = (string) $intervention['desc_panne'];
+                            $description = (string) $intervention->getDescPanne();
                             $descriptionCourte = strlen($description) > 100
                                 ? substr($description, 0, 100) . '…'
                                 : $description;
-                            $technicien = trim($intervention['technicien_prenom'] . ' ' . $intervention['technicien_nom']);
-                            $statut = (string) $intervention['statut'];
-                            $statutLower = strtolower($statut);
+                            $technicien = trim($intervention->getTechnicienPrenom() . ' ' . $intervention->getTechnicienNom());
+                            $statut = (string) $intervention->getStatut();
                             $badgeClass = 'text-bg-secondary';
-                            if (in_array($statutLower, ['clôturée', 'cloturee', 'cloturée', 'terminée', 'terminee'], true)) {
+                            if ($statut === 'CLOTUREE') {
                                 $badgeClass = 'text-bg-success';
-                            } elseif (in_array($statutLower, ['en cours', 'encours'], true)) {
+                            } elseif ($statut === 'EN_COURS') {
                                 $badgeClass = 'text-bg-info';
-                            } elseif (in_array($statutLower, ['ouverte', 'en attente'], true)) {
+                            } elseif ($statut === 'OUVERTE') {
                                 $badgeClass = 'text-bg-warning';
                             }
                             ?>
                             <tr>
-                                <td class="fw-semibold"><?= $escape($intervention['id_intervention']) ?></td>
-                                <td><?= $escape($intervention['client']) ?></td>
+                                <td class="fw-semibold"><?= $escape($intervention->getId()) ?></td>
+                                <td><?= $escape($intervention->getClient()) ?></td>
                                 <td>
-                                    <span class="d-block fw-semibold"><?= $escape($intervention['equipement']) ?></span>
-                                    <span class="small text-muted"><?= $escape($intervention['type_equipement']) ?></span>
+                                    <span class="d-block fw-semibold"><?= $escape($intervention->getNomEquipement()) ?></span>
+                                    <span class="small text-muted"><?= $escape($intervention->getTypeEquipement()) ?></span>
                                 </td>
                                 <td title="<?= $escape($description) ?>"><?= $escape($descriptionCourte) ?></td>
-                                <td data-order="<?= $escape($intervention['date_intervention']) ?>">
-                                    <?= $escape($formatDate($intervention['date_intervention'])) ?>
+                                <td data-order="<?= $escape($intervention->getDateIntervention()) ?>">
+                                    <?= $escape($formatDate($intervention->getDateIntervention())) ?>
                                 </td>
                                 <td><?= $escape($technicien) ?></td>
                                 <td><span class="badge <?= $badgeClass ?>"><?= $escape($statut) ?></span></td>
@@ -73,18 +85,18 @@ $formatDate = static function ($value): string {
                                         class="btn btn-sm btn-outline-primary text-nowrap"
                                         data-bs-toggle="modal"
                                         data-bs-target="#interventionModal"
-                                        data-id="<?= $escape($intervention['id_intervention']) ?>"
-                                        data-client="<?= $escape($intervention['client']) ?>"
-                                        data-equipement="<?= $escape($intervention['equipement']) ?>"
-                                        data-type-equipement="<?= $escape($intervention['type_equipement']) ?>"
-                                        data-num-serie="<?= $escape($intervention['num_serie']) ?>"
+                                        data-id="<?= $escape($intervention->getId()) ?>"
+                                        data-client="<?= $escape($intervention->getClient()) ?>"
+                                        data-equipement="<?= $escape($intervention->getNomEquipement()) ?>"
+                                        data-type-equipement="<?= $escape($intervention->getTypeEquipement()) ?>"
+                                        data-num-serie="<?= $escape($intervention->getNumSerie()) ?>"
                                         data-description="<?= $escape($description) ?>"
-                                        data-date="<?= $escape($formatDate($intervention['date_intervention'])) ?>"
-                                        data-date-cloture="<?= $escape($formatDate($intervention['date_cloture'])) ?>"
+                                        data-date="<?= $escape($formatDate($intervention->getDateIntervention())) ?>"
+                                        data-date-cloture="<?= $escape($formatDate($intervention->getDateCloture())) ?>"
                                         data-technicien="<?= $escape($technicien) ?>"
                                         data-statut="<?= $escape($statut) ?>"
-                                        data-rapport="<?= $escape($intervention['rapport']) ?>"
-                                        aria-label="Détails de l’intervention <?= $escape($intervention['id_intervention']) ?>">
+                                        data-rapport="<?= $escape($intervention->getRapport()) ?>"
+                                        aria-label="Détails de l’intervention <?= $escape($intervention->getId()) ?>">
                                         <i class="bi bi-eye me-1"></i>Détails
                                     </button>
                                 </td>
@@ -94,6 +106,90 @@ $formatDate = static function ($value): string {
                 </table>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="modal fade" id="creationInterventionModal" tabindex="-1" aria-labelledby="creationInterventionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <form class="modal-content" method="post" action="/interventions">
+            <input type="hidden" name="formulaire" value="creation">
+            <div class="modal-header">
+                <h2 class="modal-title h5 fw-bold" id="creationInterventionModalLabel">Créer une intervention</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="creationEquipement" class="form-label">Équipement</label>
+                    <select class="form-select" id="creationEquipement" name="id_equipement" required>
+                        <option value="">Sélectionner un équipement</option>
+                        <?php foreach ($equipements as $equipement): ?>
+                            <option
+                                    value="<?= $escape($equipement->getId()) ?>"
+                                    <?= (string) ($valeursFormulaire['id_equipement'] ?? '') === (string) $equipement->getId() ? 'selected' : '' ?>>
+                                    <?= $escape($equipement->getClient() . ' — ' . $equipement->getNom() . ' (' . $equipement->getType() . ', ' . $equipement->getNumSerie() . ')') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <?php if (empty($equipements)): ?>
+                        <div class="form-text text-danger">Ajoutez d’abord un équipement pour pouvoir créer une intervention.</div>
+                    <?php endif; ?>
+                </div>
+                <div class="mb-3">
+                    <label for="creationTechnicien" class="form-label">Technicien</label>
+                    <select class="form-select" id="creationTechnicien" name="id_employe" required>
+                        <option value="">Sélectionner un technicien</option>
+                        <?php foreach ($techniciens as $technicien): ?>
+                            <option
+                                value="<?= $escape($technicien->getId()) ?>"
+                                <?= (string) ($valeursFormulaire['id_employe'] ?? '') === (string) $technicien->getId() ? 'selected' : '' ?>>
+                                <?= $escape($technicien->getPrenom() . ' ' . $technicien->getNom()) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <?php if (empty($techniciens)): ?>
+                        <div class="form-text text-danger">Aucun employé avec le rôle TECHNICIEN n’est disponible.</div>
+                    <?php endif; ?>
+                </div>
+                <div class="mb-3">
+                    <label for="creationDate" class="form-label">Date et heure</label>
+                    <input
+                        type="datetime-local"
+                        class="form-control"
+                        id="creationDate"
+                        name="date_intervention"
+                        value="<?= $escape($valeursFormulaire['date_intervention'] ?? date('Y-m-d\TH:i')) ?>"
+                        required>
+                </div>
+                <div class="mb-3">
+                    <label for="creationDescription" class="form-label">Description de la panne</label>
+                    <textarea
+                        class="form-control"
+                        id="creationDescription"
+                        name="desc_panne"
+                        rows="4"
+                        placeholder="Décrivez la panne constatée"
+                        required><?= $escape($valeursFormulaire['desc_panne'] ?? '') ?></textarea>
+                </div>
+                <div>
+                    <label for="creationRapport" class="form-label">Rapport (facultatif)</label>
+                    <textarea
+                        class="form-control"
+                        id="creationRapport"
+                        name="rapport"
+                        rows="3"
+                        placeholder="Ajouter un rapport si nécessaire"><?= $escape($valeursFormulaire['rapport'] ?? '') ?></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    <?= empty($equipements) || empty($techniciens) ? 'disabled' : '' ?>>
+                    <i class="bi bi-check-lg me-1"></i>Créer l’intervention
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -198,4 +294,10 @@ $formatDate = static function ($value): string {
 
         document.getElementById('modalFicheComplete').href = '/intervention/' + encodeURIComponent(button.dataset.id);
     });
+
+    <?php if (!empty($erreur)): ?>
+        window.addEventListener('load', function () {
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('creationInterventionModal')).show();
+        });
+    <?php endif; ?>
 </script>
