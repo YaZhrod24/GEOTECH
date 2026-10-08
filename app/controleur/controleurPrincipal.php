@@ -34,7 +34,11 @@ class ControleurPrincipal
             'techniciens' => 'techniciens',
             'techniciens/nouveau' => 'nouveauTechnicien',
             'techniciens/{id}/modifier' => 'modifierTechnicien',
-            'techniciens/{id}/supprimer' => 'supprimerTechnicien'
+            'techniciens/{id}/supprimer' => 'supprimerTechnicien',
+            'equipements' => 'equipements',
+            'equipements/nouveau' => 'nouvelEquipement',
+            'equipements/{id}/modifier' => 'modifierEquipement',
+            'equipements/{id}/supprimer' => 'supprimerEquipement'
         ];
 
         // Parcourt toutes les routes pour trouver celle qui correspond à l'URL
@@ -314,6 +318,110 @@ class ControleurPrincipal
         $requete->execute(['id' => (int) $id]);
 
         header('Location: /techniciens');
+    }
+
+    private function equipements()
+    {
+        $titre = "Équipements - Geotech";
+        require_once Racine . '/../app/modele/bd.php';
+        $db = (new PDO_Connexion())->getConnection();
+        $equipements = $db->query(
+            'SELECT e.id_equipement, e.nom, e.type, e.num_serie, e.id_client,
+                    c.raison_social AS client
+             FROM equipements e
+             INNER JOIN clients c ON c.id_client = e.id_client
+             ORDER BY c.raison_social, e.nom'
+        )->fetchAll();
+        $clients = $db->query(
+            'SELECT id_client, raison_social FROM clients ORDER BY raison_social'
+        )->fetchAll();
+
+        require_once Racine . '/../app/vue/VueEquipements.php';
+    }
+
+    private function nouvelEquipement()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /equipements');
+            return;
+        }
+
+        require_once Racine . '/../app/modele/bd.php';
+        $nom = trim($_POST['nom'] ?? '');
+        $type = trim($_POST['type'] ?? '');
+        $numSerie = trim($_POST['num_serie'] ?? '');
+        $idClient = filter_input(INPUT_POST, 'id_client', FILTER_VALIDATE_INT);
+
+        if ($nom === '' || $type === '' || $numSerie === '' || !$idClient) {
+            $_SESSION['equipement_erreur'] = 'Tous les champs de l’équipement sont obligatoires.';
+            header('Location: /equipements');
+            return;
+        }
+
+        $db = (new PDO_Connexion())->getConnection();
+        $requete = $db->prepare(
+            'INSERT INTO equipements (nom, type, num_serie, id_client)
+             VALUES (:nom, :type, :num_serie, :id_client)'
+        );
+        $requete->execute([
+            'nom' => $nom,
+            'type' => $type,
+            'num_serie' => $numSerie,
+            'id_client' => $idClient
+        ]);
+
+        header('Location: /equipements');
+    }
+
+    private function modifierEquipement($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /equipements');
+            return;
+        }
+
+        require_once Racine . '/../app/modele/bd.php';
+        $nom = trim($_POST['nom'] ?? '');
+        $type = trim($_POST['type'] ?? '');
+        $numSerie = trim($_POST['num_serie'] ?? '');
+        $idClient = filter_input(INPUT_POST, 'id_client', FILTER_VALIDATE_INT);
+
+        if ($nom === '' || $type === '' || $numSerie === '' || !$idClient) {
+            $_SESSION['equipement_erreur'] = 'Tous les champs de l’équipement sont obligatoires.';
+            header('Location: /equipements');
+            return;
+        }
+
+        $db = (new PDO_Connexion())->getConnection();
+        $requete = $db->prepare(
+            'UPDATE equipements
+             SET nom = :nom, type = :type, num_serie = :num_serie, id_client = :id_client
+             WHERE id_equipement = :id'
+        );
+        $requete->execute([
+            'id' => (int) $id,
+            'nom' => $nom,
+            'type' => $type,
+            'num_serie' => $numSerie,
+            'id_client' => $idClient
+        ]);
+
+        header('Location: /equipements');
+    }
+
+    private function supprimerEquipement($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /equipements');
+            return;
+        }
+
+        require_once Racine . '/../app/modele/bd.php';
+        $db = (new PDO_Connexion())->getConnection();
+        $requete = $db->prepare('DELETE FROM equipements WHERE id_equipement = :id');
+        $requete->execute(['id' => (int) $id]);
+
+        header('Location: /equipements');
     }
 
     private function datePourRequete(string $date): ?string
