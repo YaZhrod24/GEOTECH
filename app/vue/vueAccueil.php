@@ -5,12 +5,6 @@
             <h2 class="fw-bold mb-0">Tableau de bord</h2>
             <p class="text-muted small mb-0">Aperçu général des interventions et statistiques du jour</p>
         </div>
-        <div>
-            <a href="interventions/nouvelle" class="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
-                <i class="bi bi-plus-lg"></i>
-                <span>+ Planifier une intervention</span>
-            </a>
-        </div>
     </div>
 
     <!-- Cartes de statistiques du jour -->
@@ -94,39 +88,43 @@
                     </thead>
                     <tbody>
                         <?php if (!empty($interventionsDuJour)): ?>
-                            <?php foreach ($interventionsDuJour as $interv): ?>
+                            <?php foreach ($interventionsDuJour as $intervention): ?>
                                 <tr>
                                     <td class="fw-bold">
-                                        <?= date('H:i', strtotime($interv['date_heure'] ?? $interv['date_intervention'])) ?>
+                                        <?= htmlspecialchars(date('H:i', strtotime($intervention->getDateIntervention())), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
                                     </td>
-                                    <td><?= htmlspecialchars($interv['client_nom'] ?? 'N/A') ?></td>
-                                    <td><?= htmlspecialchars($interv['equipement_nom'] ?? 'N/A') ?></td>
+                                    <td><?= htmlspecialchars((string) $intervention->getClient(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
+                                    </td>
+                                    <td>
+                                        <?= htmlspecialchars((string) $intervention->getNomEquipement(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
+                                        <span class="small text-muted d-block">
+                                            <?= htmlspecialchars((string) $intervention->getTypeEquipement(), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
+                                        </span>
+                                    </td>
                                     <td>
                                         <i class="bi bi-person me-1 text-muted"></i>
-                                        <?= htmlspecialchars(($interv['technicien_prenom'] ?? '') . ' ' . ($interv['technicien_nom'] ?? 'Non assigné')) ?>
+                                        <?= htmlspecialchars(trim($intervention->getTechnicienPrenom() . ' ' . $intervention->getTechnicienNom()), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
                                     </td>
                                     <td>
-                                        <?php 
-                                            $statut = strtolower($interv['statut'] ?? '');
-                                            $badgeClass = 'bg-secondary';
-                                            if ($statut === 'clôturée' || $statut === 'cloturee') {
-                                                $badgeClass = 'bg-success';
-                                            } elseif ($statut === 'en cours') {
-                                                $badgeClass = 'bg-info text-white';
-                                            } elseif ($statut === 'en attente') {
-                                                $badgeClass = 'bg-warning text-dark';
-                                            }
+                                        <?php
+                                        $statut = $intervention->getStatut();
+                                        $badgeClass = 'bg-secondary';
+                                        if ($statut === 'CLOTUREE') {
+                                            $badgeClass = 'bg-success';
+                                        } elseif ($statut === 'EN_COURS') {
+                                            $badgeClass = 'bg-info text-white';
+                                        } elseif ($statut === 'OUVERTE') {
+                                            $badgeClass = 'bg-warning text-dark';
+                                        }
                                         ?>
                                         <span class="badge <?= $badgeClass ?> rounded-pill px-3 py-2">
-                                            <?= htmlspecialchars($interv['statut'] ?? 'En attente') ?>
+                                            <?= htmlspecialchars($statut, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
                                         </span>
                                     </td>
                                     <td class="text-end">
-                                        <a href="interventions/<?= $interv['id_intervention'] ?? $interv['id'] ?>/modifier" class="btn btn-sm btn-outline-primary me-1">
-                                            Modifier
-                                        </a>
-                                        <a href="interventions/<?= $interv['id_intervention'] ?? $interv['id'] ?>/supprimer" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer cette intervention ?');">
-                                            Supprimer
+                                        <a href="/intervention/<?= (int) $intervention->getId() ?>"
+                                            class="btn btn-sm btn-outline-primary">
+                                            Détails
                                         </a>
                                     </td>
                                 </tr>

@@ -1,14 +1,30 @@
 <?php
 
-// Appel des fichiers nécessaire 
+require_once Racine . '/../app/modele/bd.php';
+require_once Racine . '/../app/modele/Interventions.php';
 
-// recuperation des donnees
+$toutesLesInterventions = Intervention::getAll();
+$aujourdHui = date('Y-m-d');
+$interventionsDuJour = [];
+$totalAujourdhui = 0;
+$countEnAttente = 0;
+$countEnCours = 0;
+$countCloturees = 0;
 
-// appel des fonctions permettant de recuperer les donnees utiles a l'affichage (modele)
+foreach ($toutesLesInterventions as $intervention) {
+    if (date('Y-m-d', strtotime($intervention->getDateIntervention())) === $aujourdHui) {
+        $interventionsDuJour[] = $intervention;
+        $totalAujourdhui++;
+    }
 
-// traitement si necessaire des donnees recuperees
-
-// appel du script de vue qui permet de gerer l'affichage des donnees
+    if ($intervention->getStatut() === 'OUVERTE') {
+        $countEnAttente++;
+    } elseif ($intervention->getStatut() === 'EN_COURS') {
+        $countEnCours++;
+    } elseif ($intervention->getStatut() === 'CLOTUREE') {
+        $countCloturees++;
+    }
+}
 
 require_once Racine . '/../app/vue/layout/entete.php';
 require_once Racine . '/../app/vue/vueAccueil.php';
