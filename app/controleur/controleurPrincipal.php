@@ -22,6 +22,9 @@ class ControleurPrincipal
         $routes = [
             '' => 'dashboard',
             'dashboard' => 'dashboard',
+            'interventions' => 'interventions',
+            'intervention/{id}' => 'interventionView',
+            'intervention/modifier/{id}' => 'interventionModify',
             'login' => 'login',
             'utilisateur/{id}' => 'afficherUtilisateur',
             'utilisateur/{id}/modifier' => 'modifierUtilisateur',
@@ -84,6 +87,28 @@ class ControleurPrincipal
         require_once Racine . '/../app/controleur/controleurDashboard.php';
     }
 
+    private function interventions()
+    {
+        $titre = "Interventions - Geotech";
+        $action = "List";
+        require_once Racine . '/../app/controleur/controleurIntervention.php';
+    }
+
+    private function interventionView($id)
+    {
+        $titre = "Intervention - Geotech";
+        $id = (int) $id; // Convertir l'ID en entier pour plus de sécurité
+        $action = "View";
+        require_once Racine . '/../app/controleur/controleurIntervention.php';
+    }
+
+    private function interventionModify($id)
+    {
+        $titre = "Modifier Intervention - Geotech";
+        $id = (int) $id; // Convertir l'ID en entier pour plus de sécurité
+        $action = "Modify";
+        require_once Racine . '/../app/controleur/controleurIntervention.php';
+    }
 
     private function login()
     {
@@ -117,7 +142,7 @@ class ControleurPrincipal
     {
         require_once Racine . '/../app/vue/cgu.php';
     }
-    
+
     private function confidentialite()
     {
         $titre = "Confidentialité - Geotech";
