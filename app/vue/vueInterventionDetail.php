@@ -2,11 +2,25 @@
 $escape = static function ($value): string {
     return htmlspecialchars((string) ($value ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 };
-$formatDate = static function ($value): string {
-    return $value ? date('d/m/Y H:i', strtotime($value)) : '—';
+$fuseauUtc = new DateTimeZone('UTC');
+$fuseauParis = new DateTimeZone('Europe/Paris');
+$formatDate = static function ($value) use ($fuseauUtc, $fuseauParis): string {
+    if (!$value) {
+        return '—';
+    }
+
+    return (new DateTimeImmutable($value, $fuseauUtc))
+        ->setTimezone($fuseauParis)
+        ->format('d/m/Y H:i');
 };
-$datePourChamp = static function ($value): string {
-    return $value ? date('Y-m-d\TH:i', strtotime($value)) : '';
+$datePourChamp = static function ($value) use ($fuseauUtc, $fuseauParis): string {
+    if (!$value) {
+        return '';
+    }
+
+    return (new DateTimeImmutable($value, $fuseauUtc))
+        ->setTimezone($fuseauParis)
+        ->format('Y-m-d\TH:i');
 };
 $technicien = trim($intervention->getTechnicienPrenom() . ' ' . $intervention->getTechnicienNom());
 $statutIntervention = $intervention->getStatut();

@@ -80,6 +80,46 @@ class InterventionDAO extends PDO_Connexion
         return $intervention === false ? null : $this->hydrater($intervention);
     }
 
+    public function getPourPeriode(string $debutUtc, string $finUtc): array
+    {
+        $sql = "
+            SELECT
+                i.id_intervention,
+                i.id_equipement,
+                i.id_employe,
+                i.desc_panne,
+                i.date_intervention,
+                i.date_cloture,
+                i.statut,
+                i.rapport,
+                c.raison_social AS client,
+                e.nom AS equipement,
+                e.type AS type_equipement,
+                e.num_serie,
+                emp.nom AS technicien_nom,
+                emp.prenom AS technicien_prenom
+            FROM interventions i
+            INNER JOIN equipements e ON e.id_equipement = i.id_equipement
+            INNER JOIN clients c ON c.id_client = e.id_client
+            INNER JOIN employes emp ON emp.id_employe = i.id_employe
+            WHERE i.date_intervention >= :debut
+                AND i.date_intervention < :fin
+            ORDER BY i.date_intervention ASC
+        ";
+
+        $statement = $this->db->prepare($sql);
+        $statement->bindValue(':debut', $debutUtc, PDO::PARAM_STR);
+        $statement->bindValue(':fin', $finUtc, PDO::PARAM_STR);
+        $statement->execute();
+
+        $interventions = [];
+        foreach ($statement->fetchAll() as $ligne) {
+            $interventions[] = $this->hydrater($ligne);
+        }
+
+        return $interventions;
+    }
+
     public function creer(Intervention $intervention): void
     {
         $sql = "
@@ -105,7 +145,7 @@ class InterventionDAO extends PDO_Connexion
             UPDATE interventions
             SET statut = :statut,
                 date_cloture = CASE
-                    WHEN :statut_cloture = 'CLOTUREE' THEN CURRENT_TIMESTAMP
+                    WHEN :statut_cloture = 'CLOTUREE' THEN UTC_TIMESTAMP()
                     ELSE NULL
                 END
             WHERE id_intervention = :id

@@ -5,12 +5,14 @@ require_once Racine . '/../app/modele/Interventions.php';
 require_once Racine . '/../app/modele/Equipements.php';
 require_once Racine . '/../app/modele/Employe.php';
 $statutsAutorises = ['OUVERTE', 'EN_COURS', 'CLOTUREE'];
-$lireDate = static function ($valeur): ?string {
+$fuseauParis = new DateTimeZone('Europe/Paris');
+$fuseauUtc = new DateTimeZone('UTC');
+$lireDate = static function ($valeur) use ($fuseauParis, $fuseauUtc): ?string {
     if (!is_string($valeur)) {
         return null;
     }
 
-    $date = DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $valeur);
+    $date = DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $valeur, $fuseauParis);
     $erreurs = DateTimeImmutable::getLastErrors();
 
     if (
@@ -21,7 +23,7 @@ $lireDate = static function ($valeur): ?string {
         return null;
     }
 
-    return $date->format('Y-m-d H:i:s');
+    return $date->setTimezone($fuseauUtc)->format('Y-m-d H:i:s');
 };
 $redirigerAvecMessage = static function (int $id, string $message): void {
     $_SESSION['intervention_message'] = $message;

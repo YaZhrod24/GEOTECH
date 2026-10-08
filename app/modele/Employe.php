@@ -51,4 +51,26 @@ class Employe
         require_once Racine . '/../app/modele/EmployeDAO.php';
         return (new EmployeDAO())->getTechniciens();
     }
+
+    public function creerTechnicien(string $motDePasse): void
+    {
+        require_once Racine . '/../app/modele/EmployeDAO.php';
+        (new EmployeDAO())->creerTechnicien($this, password_hash($motDePasse, PASSWORD_ARGON2ID));
+    }
+
+    public function modifierTechnicien(?string $motDePasse = null): bool
+    {
+        require_once Racine . '/../app/modele/EmployeDAO.php';
+        $motDePasseHash = $motDePasse === null || $motDePasse === ''
+            ? null
+            : password_hash($motDePasse, PASSWORD_ARGON2ID);
+
+        return (new EmployeDAO())->modifierTechnicien($this, $motDePasseHash);
+    }
+
+    public function supprimerTechnicien(): bool
+    {
+        require_once Racine . '/../app/modele/EmployeDAO.php';
+        return (new EmployeDAO())->supprimerTechnicien($this->id);
+    }
 }
