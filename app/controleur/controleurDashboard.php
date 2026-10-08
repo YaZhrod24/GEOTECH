@@ -1,15 +1,20 @@
 <?php
 
-// Appel des fichiers nécessaire 
+// Appel des fichiers nécessaires 
+require_once Racine . '/../app/modele/InterventionsDAO.php';
 
-// recuperation des donnees
+// Récupération des données via le DAO
+$interventionsDAO = new InterventionsDAO();
 
-// appel des fonctions permettant de recuperer les donnees utiles a l'affichage (modele)
+// Correspondance exacte des variables attendues par la vueAccueil.php
+$totalAujourdhui = $interventionsDAO->countAujourdhui();
+$countEnAttente  = $interventionsDAO->countParStatut('En attente');
+$countEnCours    = $interventionsDAO->countParStatut('En cours');
+$countCloturees  = $interventionsDAO->countParStatut('Clôturée'); // Modifie si le texte exact en base est différent (ex: 'OUVERTE', etc.)
 
-// traitement si necessaire des donnees recuperees
+$interventionsDuJour = $interventionsDAO->getInterventionsDuJourComplet();
 
-// appel du script de vue qui permet de gerer l'affichage des donnees
-
+// Appel du script de vue
 require_once Racine . '/../app/vue/layout/entete.php';
 require_once Racine . '/../app/vue/vueAccueil.php';
 require_once Racine . '/../app/vue/layout/pied.php';

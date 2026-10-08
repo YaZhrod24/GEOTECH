@@ -23,6 +23,7 @@ class ControleurPrincipal
             '' => 'dashboard',
             'dashboard' => 'dashboard',
             'login' => 'login',
+            'interventions/nouvelle' => 'nouvelleIntervention',
             'utilisateur/{id}' => 'afficherUtilisateur',
             'utilisateur/{id}/modifier' => 'modifierUtilisateur',
             'utilisateur/{id}/supprimer' => 'supprimerUtilisateur',
@@ -134,5 +135,17 @@ class ControleurPrincipal
     {
         $titre = "Planning - Geotech";
         require_once Racine . '/../app/vue/vuePlanning.php';
+    }
+
+    private function nouvelleIntervention()
+    {
+        $titre = "Planifier une intervention - Geotech";
+        // En attendant de créer le fichier contrôleur dédié, tu pourras inclure ta vue ou ton contrôleur ici :
+        // require_once Racine . '/../app/controleur/controleurNouvelleIntervention.php';
+        
+        // Pour l'instant, pour éviter la 404 le temps que tu créées la vue :
+        require_once Racine . '/../app/vue/layout/entete.php';
+        echo "<div class='container mt-4'><h2>Page de création d'intervention en cours de développement...</h2></div>";
+        require_once Racine . '/../app/vue/layout/pied.php';
     }
 }
