@@ -41,7 +41,11 @@ class ControleurPrincipal
             'equipements' => 'equipements',
             'equipements/nouveau' => 'nouvelEquipement',
             'equipements/{id}/modifier' => 'modifierEquipement',
-            'equipements/{id}/supprimer' => 'supprimerEquipement'
+            'equipements/{id}/supprimer' => 'supprimerEquipement',
+            'clients' => 'clients',
+            'clients/nouveau' => 'nouveauClient',
+            'clients/{id}/modifier' => 'modifierClient',
+            'clients/{id}/supprimer' => 'supprimerClient'
         ];
 
         // Parcourt toutes les routes pour trouver celle qui correspond à l'URL
@@ -226,6 +230,32 @@ class ControleurPrincipal
         $action = 'Delete';
         $id = (int) $id;
         require_once Racine . '/../app/controleur/controleurEquipement.php';
+    }
+
+    private function clients()
+    {
+        $action = 'List';
+        require_once Racine . '/../app/controleur/controleurClients.php';
+    }
+
+    private function nouveauClient()
+    {
+        $action = 'Create';
+        require_once Racine . '/../app/controleur/controleurClients.php';
+    }
+
+    private function modifierClient($id)
+    {
+        $action = 'Update';
+        $id = (int) $id;
+        require_once Racine . '/../app/controleur/controleurClients.php';
+    }
+
+    private function supprimerClient($id)
+    {
+        $action = 'Delete';
+        $id = (int) $id;
+        require_once Racine . '/../app/controleur/controleurClients.php';
     }
 
 }

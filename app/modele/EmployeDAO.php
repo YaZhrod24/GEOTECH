@@ -112,9 +112,26 @@ class EmployeDAO extends PDO_Connexion
         ");
         $statement->bindValue(':id', $id, PDO::PARAM_INT);
         $statement->bindValue(':role', 'TECHNICIEN', PDO::PARAM_STR);
-        $statement->execute();
+        try {
+            $statement->execute();
+        } catch (PDOException $exception) {
+            $this->gererErreurCleEtrangereTechnicien($exception);
+        }
 
         return $statement->rowCount() > 0;
+    }
+
+    private function gererErreurCleEtrangereTechnicien(PDOException $exception): never
+    {
+        if ($exception->getCode() === '23000' && (int) ($exception->errorInfo[1] ?? 0) === 1451) {
+            throw new DomainException(
+                'Ce technicien est associé à une ou plusieurs interventions et ne peut pas être supprimé.',
+                0,
+                $exception
+            );
+        }
+
+        throw $exception;
     }
 
     private function getTechnicienById(int $id): ?Employe

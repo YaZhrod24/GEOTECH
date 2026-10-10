@@ -56,5 +56,21 @@ class Client
         return (new ClientDAO())->getAll();
     }
 
-    // Faire plus tard les setter si besoin
+    public function creer(): bool
+    {
+        require_once Racine . '/../app/modele/ClientsDAO.php';
+        return (new ClientDAO())->creer($this);
+    }
+
+    public function modifier(): bool
+    {
+        require_once Racine . '/../app/modele/ClientsDAO.php';
+        return (new ClientDAO())->modifier($this);
+    }
+
+    public function supprimer(): bool
+    {
+        require_once Racine . '/../app/modele/ClientsDAO.php';
+        return (new ClientDAO())->supprimer($this);
+    }
 }

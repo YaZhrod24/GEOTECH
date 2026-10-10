@@ -35,10 +35,16 @@ if ($action === 'Create' || $action === 'Update') {
     }
 
     $equipement = new Equipement($id, $nom, $type, $numSerie, $idClient);
-    if ($creation) {
-        $equipement->creer();
-    } else {
-        $equipement->modifier();
+    try {
+        $enregistre = $creation ? $equipement->creer() : $equipement->modifier();
+    } catch (DomainException $exception) {
+        $_SESSION['equipement_erreur'] = $exception->getMessage();
+        header('Location: /equipements');
+        return;
+    }
+
+    if (!$enregistre) {
+        $_SESSION['equipement_erreur'] = 'L’équipement demandé n’existe pas ou n’a pas pu être enregistré.';
     }
 
     header('Location: /equipements');
@@ -51,7 +57,18 @@ if ($action === 'Delete') {
         return;
     }
 
-    (new Equipement((int) $id, '', '', '', 0))->supprimer();
+    try {
+        $supprime = (new Equipement((int) $id, '', '', '', 0))->supprimer();
+    } catch (DomainException $exception) {
+        $_SESSION['equipement_erreur'] = $exception->getMessage();
+        header('Location: /equipements');
+        return;
+    }
+
+    if (!$supprime) {
+        $_SESSION['equipement_erreur'] = 'L’équipement demandé n’existe pas.';
+    }
+
     header('Location: /equipements');
     return;
 }
