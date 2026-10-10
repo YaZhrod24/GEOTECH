@@ -43,10 +43,16 @@ if ($action === 'Create' || $action === 'Update') {
         'TECHNICIEN'
     );
 
-    if ($creation) {
-        $technicien->creerTechnicien($motDePasse);
-    } else {
-        $technicien->modifierTechnicien($motDePasse === '' ? null : $motDePasse);
+    try {
+        if ($creation) {
+            $technicien->creerTechnicien($motDePasse);
+        } else {
+            $technicien->modifierTechnicien($motDePasse === '' ? null : $motDePasse);
+        }
+    } catch (DomainException $exception) {
+        $_SESSION['technicien_erreur'] = $exception->getMessage();
+        header('Location: /techniciens');
+        return;
     }
 
     header('Location: /techniciens');
@@ -60,7 +66,18 @@ if ($action === 'Delete') {
     }
 
     $technicien = new Employe((int) $id, '', '', '', '', null, 'TECHNICIEN');
-    $technicien->supprimerTechnicien();
+    try {
+        $supprime = $technicien->supprimerTechnicien();
+    } catch (DomainException $exception) {
+        $_SESSION['technicien_erreur'] = $exception->getMessage();
+        header('Location: /techniciens');
+        return;
+    }
+
+    if (!$supprime) {
+        $_SESSION['technicien_erreur'] = 'Le technicien demandé n’existe pas.';
+    }
+
     header('Location: /techniciens');
     return;
 }

@@ -47,7 +47,11 @@ class EquipementDAO extends PDO_Connexion
         $statement->bindValue(':num_serie', $equipement->getNumSerie(), PDO::PARAM_STR);
         $statement->bindValue(':id_client', $equipement->getIdClient(), PDO::PARAM_INT);
 
-        return $statement->execute();
+        try {
+            return $statement->execute();
+        } catch (PDOException $exception) {
+            $this->gererErreurCleEtrangere($exception, false);
+        }
     }
 
     public function modifier(Equipement $equipement): bool
@@ -62,7 +66,11 @@ class EquipementDAO extends PDO_Connexion
         $statement->bindValue(':num_serie', $equipement->getNumSerie(), PDO::PARAM_STR);
         $statement->bindValue(':id_client', $equipement->getIdClient(), PDO::PARAM_INT);
         $statement->bindValue(':id', $equipement->getId(), PDO::PARAM_INT);
-        $statement->execute();
+        try {
+            $statement->execute();
+        } catch (PDOException $exception) {
+            $this->gererErreurCleEtrangere($exception, false);
+        }
 
         return $statement->rowCount() > 0 || $this->existe((int) $equipement->getId());
     }
@@ -71,9 +79,37 @@ class EquipementDAO extends PDO_Connexion
     {
         $statement = $this->db->prepare('DELETE FROM equipements WHERE id_equipement = :id');
         $statement->bindValue(':id', $id, PDO::PARAM_INT);
-        $statement->execute();
+        try {
+            $statement->execute();
+        } catch (PDOException $exception) {
+            $this->gererErreurCleEtrangere($exception, true);
+        }
 
         return $statement->rowCount() > 0;
+    }
+
+    private function gererErreurCleEtrangere(PDOException $exception, bool $suppression): never
+    {
+        if ($exception->getCode() === '23000') {
+            $codeSql = (int) ($exception->errorInfo[1] ?? 0);
+            if ($suppression && $codeSql === 1451) {
+                throw new DomainException(
+                    'Cet équipement est associé à une ou plusieurs interventions et ne peut pas être supprimé.',
+                    0,
+                    $exception
+                );
+            }
+
+            if (!$suppression && $codeSql === 1452) {
+                throw new DomainException(
+                    'Le client sélectionné n’existe pas. Actualisez la page et réessayez.',
+                    0,
+                    $exception
+                );
+            }
+        }
+
+        throw $exception;
     }
 
     private function existe(int $id): bool
