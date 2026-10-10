@@ -2,75 +2,86 @@
 namespace App\Controllers;
 
 use App\Config\Database;
-use PDO;
 
 class InterventionController {
 
-    // GET /interventions : Manager voit tout, Technicien ne voit que les siennes
+    // GET /interventions : le technicien voit uniquement ses interventions
     public static function getAll($user) {
-        $db = Database::getConnection();
-
-        if ($user->role === 'admin') {
-            $sql = "SELECT i.*, c.raison_social AS client_nom, e.nom AS equipement_nom, emp.nom AS tech_nom, emp.prenom AS tech_prenom
-                    FROM Intervention i
-                    JOIN Equipement e ON i.id_equipement = e.id_equipement
-                    JOIN Client c ON e.id_client = c.id_client
-                    JOIN Employe emp ON i.id_employe = emp.id_employe
-                    ORDER BY i.date_intervention ASC";
-            $stmt = $db->query($sql);
-            $interventions = $stmt->fetchAll();
-        } else {
-            $sql = "SELECT i.*, c.raison_social AS client_nom, c.adresse, c.ville, c.tel AS client_tel, e.nom AS equipement_nom
-                    FROM Intervention i
-                    JOIN Equipement e ON i.id_equipement = e.id_equipement
-                    JOIN Client c ON e.id_client = c.id_client
-                    WHERE i.id_employe = ?
-                    ORDER BY i.date_intervention ASC";
-            $stmt = $db->prepare($sql);
-            $stmt->execute([$user->id_employe]);
-            $interventions = $stmt->fetchAll();
+        if (!self::estTechnicien($user)) {
+            return;
         }
 
-        echo json_encode($interventions);
+        $db = Database::getConnection();
+        $stmt = $db->prepare("
+            SELECT i.*, c.raison_social AS client_nom, c.adresse, c.ville, c.tel AS client_tel,
+                   e.nom AS equipement_nom, e.type AS equipement_type, e.num_serie
+            FROM interventions i
+            JOIN equipements e ON i.id_equipement = e.id_equipement
+            JOIN clients c ON e.id_client = c.id_client
+            WHERE i.id_employe = ?
+            ORDER BY i.date_intervention ASC
+        ");
+        $stmt->execute([$user->id_employe]);
+
+        echo json_encode($stmt->fetchAll());
     }
 
-    // POST /interventions : Réservé au manager
-    public static function create($user) {
-        if ($user->role !== 'admin') {
+    // GET /interventions/jour : interventions du jour, selon le fuseau horaire français
+    public static function getToday($user) {
+        if (!self::estTechnicien($user)) {
+            return;
+        }
+
+        $fuseauParis = new \DateTimeZone('Europe/Paris');
+        $fuseauUtc = new \DateTimeZone('UTC');
+        $debutJour = new \DateTimeImmutable('today', $fuseauParis);
+        $debutUtc = $debutJour->setTimezone($fuseauUtc)->format('Y-m-d H:i:s');
+        $finUtc = $debutJour->modify('+1 day')->setTimezone($fuseauUtc)->format('Y-m-d H:i:s');
+
+        $db = Database::getConnection();
+        $stmt = $db->prepare("
+            SELECT i.*, c.raison_social AS client_nom, c.adresse, c.ville, c.tel AS client_tel,
+                   e.nom AS equipement_nom, e.type AS equipement_type, e.num_serie
+            FROM interventions i
+            JOIN equipements e ON i.id_equipement = e.id_equipement
+            JOIN clients c ON e.id_client = c.id_client
+            WHERE i.id_employe = ?
+              AND i.date_intervention >= ?
+              AND i.date_intervention < ?
+            ORDER BY i.date_intervention ASC
+        ");
+        $stmt->execute([$user->id_employe, $debutUtc, $finUtc]);
+
+        echo json_encode($stmt->fetchAll());
+    }
+
+    private static function estTechnicien($user): bool {
+        if (($user->role ?? null) !== 'TECHNICIEN' || empty($user->id_employe)) {
             http_response_code(403);
-            echo json_encode(['error' => 'Action réservée aux managers']);
-            return;
+            echo json_encode(['error' => 'Cette action est réservée aux techniciens']);
+            return false;
         }
 
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        if (empty($data['desc_panne']) || empty($data['date_intervention']) || empty($data['id_equipement']) || empty($data['id_employe'])) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Champs obligatoires manquants']);
-            return;
-        }
-
-        $db = Database::getConnection();
-        $stmt = $db->prepare("INSERT INTO Intervention (desc_panne, date_intervention, statut, id_equipement, id_employe) 
-                              VALUES (?, ?, 'En attente', ?, ?)");
-        $stmt->execute([
-            $data['desc_panne'],
-            $data['date_intervention'],
-            $data['id_equipement'],
-            $data['id_employe']
-        ]);
-
-        http_response_code(201);
-        echo json_encode(['message' => 'Intervention créée', 'id' => $db->lastInsertId()]);
+        return true;
     }
 
-    // PUT /interventions/{id}/status : Technicien met à jour le statut ou le rapport
+    // PUT /interventions/{id}/status : le technicien modifie le rapport et avance le statut
     public static function updateStatus($id, $user) {
+        if (!self::estTechnicien($user)) {
+            return;
+        }
+
         $data = json_decode(file_get_contents('php://input'), true);
+        if (!is_array($data) || (!isset($data['statut']) && !array_key_exists('rapport', $data))) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Le corps JSON doit contenir un statut ou un rapport']);
+            return;
+        }
+
         $db = Database::getConnection();
 
         // Récupérer l'intervention
-        $stmt = $db->prepare("SELECT * FROM Intervention WHERE id_intervention = ?");
+        $stmt = $db->prepare("SELECT * FROM interventions WHERE id_intervention = ?");
         $stmt->execute([$id]);
         $intervention = $stmt->fetch();
 
@@ -80,22 +91,22 @@ class InterventionController {
             return;
         }
 
-        // Vérification des droits
-        if ($user->role !== 'admin') {
-            if ($intervention['id_employe'] != $user->id_employe) {
-                http_response_code(403);
-                echo json_encode(['error' => 'Cette intervention ne vous est pas assignée']);
-                return;
-            }
+        if ((int) $intervention['id_employe'] !== (int) $user->id_employe) {
+            http_response_code(403);
+            echo json_encode(['error' => 'Cette intervention ne vous est pas assignée']);
+            return;
         }
 
-        // Règle du sujet : une intervention clôturée devient non modifiable pour le technicien
-        if ($user->role !== 'admin') {
-            if ($intervention['statut'] === 'Clôturée') {
-                http_response_code(403);
-                echo json_encode(['error' => 'Intervention clôturée : modification interdite']);
-                return;
-            }
+        if ($intervention['statut'] === 'CLOTUREE') {
+            http_response_code(403);
+            echo json_encode(['error' => 'Intervention clôturée : modification interdite']);
+            return;
+        }
+
+        if (array_key_exists('rapport', $data) && $data['rapport'] !== null && !is_string($data['rapport'])) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Le rapport doit être un texte ou null']);
+            return;
         }
 
         $statut = $intervention['statut'];
@@ -109,13 +120,29 @@ class InterventionController {
         }
 
         $dateCloture = $intervention['date_cloture'];
-        if ($statut === 'Clôturée') {
+        if (!in_array($statut, ['OUVERTE', 'EN_COURS', 'CLOTUREE'], true)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Statut invalide']);
+            return;
+        }
+
+        $transitionsAutorisees = [
+            'OUVERTE' => ['OUVERTE', 'EN_COURS'],
+            'EN_COURS' => ['EN_COURS', 'CLOTUREE']
+        ];
+        if (!in_array($statut, $transitionsAutorisees[$intervention['statut']] ?? [], true)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Le statut ne peut pas revenir en arrière']);
+            return;
+        }
+
+        if ($statut === 'CLOTUREE') {
             if (!$intervention['date_cloture']) {
                 $dateCloture = date('Y-m-d H:i:s');
             }
         }
 
-        $update = $db->prepare("UPDATE Intervention SET statut = ?, rapport = ?, date_cloture = ? WHERE id_intervention = ?");
+        $update = $db->prepare("UPDATE interventions SET statut = ?, rapport = ?, date_cloture = ? WHERE id_intervention = ?");
         $update->execute([$statut, $rapport, $dateCloture, $id]);
 
         echo json_encode(['message' => 'Statut mis à jour']);

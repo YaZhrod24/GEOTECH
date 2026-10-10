@@ -5,10 +5,9 @@ use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Exception;
 
-class AuthMiddleware {
-    require_once __DIR__ . '/../Config/config.php';
-            return JWT::decode($matches[1], new Key(JWT_SECRET, 'HS256'));
+require_once __DIR__ . '/../Config/config.php';
 
+class AuthMiddleware {
     public function authenticate(): ?object {
         $headers = getallheaders();
         $authHeader = null;
@@ -32,7 +31,7 @@ class AuthMiddleware {
         }
 
         try {
-            return JWT::decode($matches[1], new Key(self::$secretKey, 'HS256'));
+            return JWT::decode($matches[1], new Key(JWT_SECRET, 'HS256'));
         } catch (Exception $e) {
             http_response_code(401);
             echo json_encode(['error' => 'Token invalide ou expiré']);
