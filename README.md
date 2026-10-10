@@ -1,6 +1,6 @@
 # GeoTech — application technicien
 
-Interface Vue 3 pour l’application terrain GeoTech. L’écran de connexion échange avec l’API, conserve le jeton de session et récupère le compte technicien connecté.
+Interface Vue 3 pour l’application terrain GeoTech. L’écran de connexion échange avec l’API, conserve le jeton de session, récupère le compte technicien connecté et affiche son planning du jour.
 
 ## Démarrer en local
 
@@ -30,8 +30,8 @@ Vite n’est ni Vue, ni l’API, ni à lui seul une PWA. Vue sert à construire 
 
 ## Fichiers principaux
 
-- `src/App.vue` : écran de connexion Vue.
-- `src/api.js` : appels HTTP vers l’API (`/login` et `/compte`).
+- `src/App.vue` : connexion et agenda journalier du technicien.
+- `src/api.js` : appels HTTP vers l’API (`/login`, `/compte` et `/interventions/jour`).
 - `src/style.css` : styles de l’interface et couleurs GeoTech.
 - `src/main.js` : démarre Vue et charge les styles.
 - `index.html` : document HTML de départ utilisé par Vite.
