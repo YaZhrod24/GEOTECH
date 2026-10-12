@@ -47,9 +47,7 @@ a:focus-visible {
   align-items: center;
   justify-content: center;
   padding: 48px 20px 24px;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgb(0 191 99 / 8%), transparent 42%),
-    #f5f8f6;
+  background: #ffffff;
 }
 
 .login-card {

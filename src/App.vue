@@ -189,10 +189,7 @@ function statusLabel(status) {
     <section v-else-if="account" class="planning-page" aria-labelledby="planning-title">
       <header class="planning-header">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true">
             <img src="/logo.svg" alt="" />
-          </span>
-          <span class="brand-name">GEOTECH</span>
         </div>
         <button class="text-button" type="button" @click="logout">Déconnexion</button>
       </header>
