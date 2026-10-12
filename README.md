@@ -11,6 +11,14 @@ npm.cmd install
 npm.cmd run dev
 ```
 
+ou
+
+```powershell
+npm.cmd run dev -- --host
+```
+
+Pour exposer le port sur les cartes réseau de la machine
+
 Ouvrir ensuite l’adresse locale indiquée par Vite dans le terminal, généralement `http://localhost:5173`.
 
 L’URL de l’API est configurée dans `.env` avec `VITE_API_URL`. Pour l’API locale GeoTech, la valeur est `http://geotechapi.test`. En développement, Vite relaie les appels via `/api` : le navigateur n’a donc pas besoin de CORS en local. Après un changement de cette valeur, redémarrer le serveur Vite.
