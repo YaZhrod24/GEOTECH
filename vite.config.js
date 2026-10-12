@@ -6,8 +6,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://geotechapi.test',
+        target: 'https://172.27.0.55',
         changeOrigin: true,
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
@@ -16,8 +17,12 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true,
+        type: 'module' // Option cruciale pour que le Service Worker fonctionne en mode "dev" avec Vite
+      },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg}'] // Met en cache les fichiers vitaux
+        globPatterns: ['**/*.{js,css,html,svg}']
       },
       manifest: {
         name: 'Geotech',
@@ -25,7 +30,7 @@ export default defineConfig({
         theme_color: '#ffffff',
         icons: [
           {
-            src: '/logo.svg', // Ton logo existant[cite: 1]
+            src: '/logo.svg',
             sizes: '192x192',
             type: 'image/svg+xml'
           }

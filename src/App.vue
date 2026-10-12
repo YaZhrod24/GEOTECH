@@ -26,40 +26,36 @@ const tokenStorageKey = 'geotech_access_token'
 // Fonction pour charger les informations du compte à partir du token
 async function loadAccount(token) {
   try {
-    // Appel de la fonction getAccount du fichier api.js avec le token pour récupérer les informations du compte
     account.value = await getAccount(token)
+    // Succès : on sauvegarde le profil localement
+    localStorage.setItem('account_geotech', JSON.stringify(account.value))
   } catch (error) {
-    // Si le token est invalide ou expiré, on supprime le token du localStorage et on réinitialise l'état du compte
     if (error.status === 401 || error.status === 403) {
       localStorage.removeItem(tokenStorageKey)
       account.value = null
       return false
     }
-
+    
+    // Échec (hors ligne) : on lit le profil sauvegardé
+    const sauvegardeCompte = localStorage.getItem('account_geotech')
+    if (sauvegardeCompte) {
+      account.value = JSON.parse(sauvegardeCompte)
+      return true // On force la réussite pour passer à l'étape des missions
+    }
     throw error
   }
-
   return true
 }
 
-// Fonction pour charger les interventions prévues pour aujourd'hui à partir du token
 async function loadPlanning(token) {
   planningError.value = ''
   isLoadingPlanning.value = true
 
-  // Appel de la fonction getTodayInterventions du fichier api.js avec le token pour récupérer les interventions
   try {
     const response = await getTodayInterventions(token)
-    if (!Array.isArray(response)) {
-      // Si la réponse n'est pas un tableau, on lance une erreur indiquant que la réponse du planning est invalide
-      throw new Error('La réponse du planning est invalide.')
-    }
-
     interventions.value = response
+    localStorage.setItem('missions_geotech', JSON.stringify(response))
   } catch (error) {
-    // Si le token est invalide ou expiré, on supprime le token du localStorage 
-    // et on réinitialise l'état du compte et des interventions
-
     if (error.status === 401 || error.status === 403) {
       localStorage.removeItem(tokenStorageKey)
       account.value = null
@@ -67,10 +63,16 @@ async function loadPlanning(token) {
       interventions.value = []
       planningError.value = 'Votre session a expiré. Veuillez vous reconnecter.'
     } else {
-      planningError.value = error.message
+      // Lecture de la sauvegarde hors ligne
+      const sauvegarde = localStorage.getItem('missions_geotech')
+      if (sauvegarde) {
+        interventions.value = JSON.parse(sauvegarde)
+        planningError.value = '' // IMPORTANT : On vide l'erreur pour débloquer l'affichage
+      } else {
+        planningError.value = error.message
+      }
     }
   } finally {
-    // On réinitialise l'état de chargement du planning, que la requête ait réussi ou échoué
     isLoadingPlanning.value = false
   }
 }
