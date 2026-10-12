@@ -261,10 +261,8 @@ function statusLabel(status) {
 
     <!-- ------------------------------ Page de connexion si aucune des conditions n'est remplie ------------------------------ -->
     <section v-else class="login-card" aria-labelledby="page-title">
-      <a class="brand" href="/" aria-label="GeoTech, accueil">
-        <span class="brand-mark" aria-hidden="true">
+      <a class="brand login-brand" href="/" aria-label="GeoTech, accueil">
           <img src="/logo.svg" alt="" />
-        </span>
       </a>
 
       <div class="heading">

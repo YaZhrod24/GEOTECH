@@ -67,6 +67,18 @@ a:focus-visible {
   text-decoration: none;
 }
 
+.login-brand img {
+  display: block;
+  width: 300px;
+  height: auto;
+}
+
+.login-brand {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
 .brand-mark {
   display: grid;
   width: 38px;
@@ -324,6 +336,12 @@ h1 {
 
 .planning-header .brand {
   gap: 10px;
+}
+
+.planning-header .brand img {
+  display: block;
+  width:300px;
+  height: auto;
 }
 
 .brand-name {
