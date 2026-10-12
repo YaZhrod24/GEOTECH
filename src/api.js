@@ -75,3 +75,30 @@ export function getAccount(token) {
 export function getTodayInterventions(token) {
   return apiRequest('/interventions/jour', { token })
 }
+
+export async function chargerMissions() {
+  try {
+    // Récupération du token depuis le Local Storage
+    const token = localStorage.getItem('geotech_access_token');
+    
+    // Ajout du token dans l'en-tête (Header) de la requête
+    const reponse = await fetch('http://geotechapi.test/interventions/jour', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }); 
+    
+    const missions = await reponse.json();
+
+    // Sauvegarde uniquement si la requête a réussi
+    if (reponse.ok) {
+      localStorage.setItem('missions_geotech', JSON.stringify(missions));
+    }
+    return missions;
+  } catch (erreur) {
+    // Lecture de la sauvegarde hors ligne
+    const sauvegarde = localStorage.getItem('missions_geotech');
+    return sauvegarde ? JSON.parse(sauvegarde) : [];
+  }
+}

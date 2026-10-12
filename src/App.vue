@@ -1,7 +1,9 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 // Récupération des fonctions d'API pour la connexion et la récupération du compte depuis le fichier api.js
-import { getAccount, getTodayInterventions, login } from './api'
+import { getAccount, getTodayInterventions, login, chargerMissions } from './api.js'
+
+const mesMissions = ref([]);
 
 // variables de gestion du compte et de la session
 const email = ref('')
@@ -175,6 +177,12 @@ function statusLabel(status) {
     CLOTUREE: 'Clôturée',
   }[status] || status || 'Statut inconnu'
 }
+
+onMounted(async () => {
+  // Au chargement de la page, on récupère les missions
+  mesMissions.value = await chargerMissions(); 
+});
+
 </script>
 
 <template>
