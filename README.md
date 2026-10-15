@@ -20,8 +20,12 @@ npm.cmd run dev -- --host
 Pour exposer le port sur les cartes réseau de la machine
 
 Ouvrir ensuite l’adresse locale indiquée par Vite dans le terminal, généralement `http://localhost:5173`.
+Le mode normal reste en HTTP pour faciliter le développement.
 
-L’URL de l’API est configurée dans `.env` avec `VITE_API_URL`. Pour l’API locale GeoTech, la valeur est `http://geotechapi.test`. En développement, Vite relaie les appels via `/api` : le navigateur n’a donc pas besoin de CORS en local. Après un changement de cette valeur, redémarrer le serveur Vite.
+L’URL de l’API est configurée dans `.env` avec `VITE_API_URL`. Laissez cette variable vide pour utiliser
+le proxy Vite `/api`, dont la cible est définie par `VITE_API_PROXY_TARGET`. Le proxy fonctionne en mode
+développement et en mode preview : le navigateur n’a donc pas besoin de CORS en local. Après un changement
+de ces valeurs, redémarrez Vite.
 
 Pour préparer et prévisualiser la version optimisée :
 
@@ -29,6 +33,23 @@ Pour préparer et prévisualiser la version optimisée :
 npm.cmd run build
 npm.cmd run preview
 ```
+
+Le preview normal est disponible sur `http://localhost:4173`.
+
+Pour tester l’installation PWA depuis une tablette ou un téléphone, utilisez le HTTPS local :
+
+```powershell
+npm.cmd run dev:https
+```
+
+ou, après le build :
+
+```powershell
+npm.cmd run preview:https
+```
+
+Les adresses sont alors respectivement `https://<ip-du-pc>:5173` et `https://<ip-du-pc>:4173`.
+Le certificat HTTPS local est auto-signé : acceptez l’avertissement du navigateur sur l’appareil.
 
 ## Pourquoi Vite ?
 

@@ -1,7 +1,6 @@
-// apiBaseUrl récupère l'URL de base de l'API à partir des variables d'environnement. En mode développement, elle est définie sur '/api', sinon elle utilise la variable VITE_API_URL ou une valeur par défaut.
-const apiBaseUrl = import.meta.env.DEV
-  ? '/api'
-  : (import.meta.env.VITE_API_URL || 'https://172.27.0.55').replace(/\/+$/, '')
+// Le proxy local évite les problèmes de CORS en développement et en preview.
+// En production, VITE_API_URL peut pointer vers l'API publique.
+const apiBaseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '')
 
   // La fonction apiRequest effectue une requête HTTP vers l'API en utilisant fetch. 
   // Elle prend en paramètre le chemin de l'API, un objet d'options contenant le token d'authentification, la méthode HTTP et le corps de la requête. 
