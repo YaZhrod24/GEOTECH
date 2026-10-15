@@ -1,6 +1,10 @@
-// Le proxy local évite les problèmes de CORS en développement et en preview.
-// En production, VITE_API_URL peut pointer vers l'API publique.
-const apiBaseUrl = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '')
+// Le proxy local est utilisé pendant le développement. La version compilée
+// appelle directement l'API pour fonctionner aussi depuis un hébergement statique.
+const apiBaseUrl = (
+  import.meta.env.DEV
+    ? '/api'
+    : (import.meta.env.VITE_API_URL || 'https://172.27.0.57')
+).replace(/\/+$/, '')
 
   // La fonction apiRequest effectue une requête HTTP vers l'API en utilisant fetch. 
   // Elle prend en paramètre le chemin de l'API, un objet d'options contenant le token d'authentification, la méthode HTTP et le corps de la requête. 
@@ -84,7 +88,7 @@ export async function chargerMissions() {
     const token = localStorage.getItem('geotech_access_token');
     
     // Ajout du token dans l'en-tête (Header) de la requête
-    const reponse = await fetch('https://172.27.0.55/interventions/jour', {
+    const reponse = await fetch('https://172.27.0.57/interventions/jour', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
