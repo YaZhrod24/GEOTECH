@@ -3,7 +3,7 @@
 const apiBaseUrl = (
   import.meta.env.DEV
     ? ''
-    : (import.meta.env.VITE_API_URL || 'https://172.27.0.57')
+    : (import.meta.env.VITE_API_URL || 'https://172.27.0.55')
 ).replace(/\/+$/, '')
 
   // La fonction apiRequest effectue une requête HTTP vers l'API en utilisant fetch. 
@@ -88,7 +88,7 @@ export async function chargerMissions() {
     const token = localStorage.getItem('geotech_access_token');
     
     // Ajout du token dans l'en-tête (Header) de la requête
-    const reponse = await fetch('https://172.27.0.57/interventions/jour', {
+    const reponse = await fetch('https://172.27.0.55/interventions/jour', {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
