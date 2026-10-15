@@ -39,6 +39,10 @@ function isStandaloneMode() {
   return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
 }
 
+function isInstallableContext() {
+  return window.isSecureContext || window.location.hostname === 'localhost'
+}
+
 function prepareInstallPrompt() {
   if (!isMobileOrTablet() || isStandaloneMode() || sessionStorage.getItem(installPromptDismissedKey)) {
     return
@@ -67,8 +71,8 @@ async function installApplication() {
 
   if (!deferredInstallPrompt.value) {
     installError.value = window.isSecureContext
-      ? 'Utilisez le menu de votre navigateur, puis choisissez « Ajouter à l’écran d’accueil ».'
-      : 'L’installation nécessite HTTPS. Relancez le preview avec « npm.cmd run preview:https », puis ouvrez l’adresse HTTPS sur la tablette.'
+      ? 'Android ne propose pas encore l’installation native. Vérifiez que vous utilisez Chrome et que le site est ouvert directement.'
+      : 'Android bloque l’installation native en HTTP. Il faut ouvrir cette application en HTTPS (ou sur localhost).'
     return
   }
 
@@ -456,7 +460,7 @@ function statusLabel(status) {
         </p>
         <p v-else class="install-help" role="status">{{ installError }}</p>
         <button class="install-button" type="button" :disabled="isInstalling" @click="installApplication">
-          {{ isInstalling ? 'Installation…' : isIosInstall ? 'Voir comment installer' : deferredInstallPrompt ? 'Télécharger l’application' : 'Comment installer' }}
+          {{ isInstalling ? 'Installation…' : isIosInstall ? 'Voir comment installer' : deferredInstallPrompt ? 'Installer l’application' : isInstallableContext() ? 'Préparer l’installation' : 'Pourquoi ce n’est pas possible' }}
         </button>
       </div>
     </aside>

@@ -1,12 +1,10 @@
 import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
-import basicSsl from '@vitejs/plugin-basic-ssl'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const apiTarget = env.VITE_API_PROXY_TARGET || env.VITE_API_URL || 'https://172.27.0.55'
-  const useHttps = env.VITE_HTTPS === 'true'
 
   const apiProxy = {
     '/api': {
@@ -20,16 +18,13 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       host: true,
-      https: useHttps,
       proxy: apiProxy,
     },
     preview: {
       host: true,
-      https: useHttps,
       proxy: apiProxy,
     },
     plugins: [
-      ...(useHttps ? [basicSsl()] : []),
       vue(),
       VitePWA({
         registerType: 'autoUpdate',
@@ -52,8 +47,13 @@ export default defineConfig(({ mode }) => {
           theme_color: '#00bf63',
           icons: [
             {
-              src: '/logo.svg',
-              sizes: 'any',
+              src: '/pwa-192.svg',
+              sizes: '192x192',
+              type: 'image/svg+xml'
+            },
+            {
+              src: '/pwa-512.svg',
+              sizes: '512x512',
               type: 'image/svg+xml'
             }
           ]

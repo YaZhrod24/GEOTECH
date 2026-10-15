@@ -36,21 +36,6 @@ npm.cmd run preview
 
 Le preview normal est disponible sur `http://localhost:4173`.
 
-Pour tester l’installation PWA depuis une tablette ou un téléphone, utilisez le HTTPS local :
-
-```powershell
-npm.cmd run dev:https
-```
-
-ou, après le build :
-
-```powershell
-npm.cmd run preview:https
-```
-
-Les adresses sont alors respectivement `https://<ip-du-pc>:5173` et `https://<ip-du-pc>:4173`.
-Le certificat HTTPS local est auto-signé : acceptez l’avertissement du navigateur sur l’appareil.
-
 ## Pourquoi Vite ?
 
 Vite est l’outil de développement et de construction du frontend. Pendant le développement, il démarre un serveur local qui recharge rapidement la page quand les fichiers changent. Pour la mise en ligne, `npm.cmd run build` produit les fichiers optimisés dans `dist/`.

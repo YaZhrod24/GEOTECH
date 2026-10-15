@@ -5,16 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:https": "vite --host --mode https",
     "build": "vite build",
-    "preview": "vite preview",
-    "preview:https": "vite preview --host --mode https"
+    "preview": "vite preview"
   },
   "dependencies": {
     "vue": "^3.5.42"
   },
   "devDependencies": {
-    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "@vitejs/plugin-vue": "^6.0.8",
     "vite": "^8.3.0",
     "vite-plugin-pwa": "^2.0.0"
