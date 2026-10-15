@@ -1,8 +1,8 @@
-// Le proxy local est utilisé pendant le développement. La version compilée
-// appelle directement l'API pour fonctionner aussi depuis un hébergement statique.
+// En développement, Vite proxyfie directement les routes de l'API.
+// La version compilée appelle directement l'API depuis un hébergement statique.
 const apiBaseUrl = (
   import.meta.env.DEV
-    ? '/api'
+    ? ''
     : (import.meta.env.VITE_API_URL || 'https://172.27.0.57')
 ).replace(/\/+$/, '')
 

@@ -23,9 +23,11 @@ Ouvrir ensuite l’adresse locale indiquée par Vite dans le terminal, général
 Le mode normal reste en HTTP pour faciliter le développement.
 
 L’URL de l’API est configurée dans `.env` avec `VITE_API_URL`. Laissez cette variable vide pour utiliser
-le proxy Vite `/api`, dont la cible est définie par `VITE_API_PROXY_TARGET`. Le proxy fonctionne en mode
-développement et en mode preview : le navigateur n’a donc pas besoin de CORS en local. Après un changement
-de ces valeurs, redémarrez Vite.
+le proxy Vite sur les routes `/login`, `/compte` et `/interventions`, dont la cible est définie par
+`VITE_API_PROXY_TARGET`. Le proxy fonctionne en mode
+développement : le navigateur n’a donc pas besoin de CORS en local. En production ou avec `vite preview`,
+`VITE_API_URL` doit contenir l’URL complète de l’API, car le navigateur appelle alors directement celle-ci.
+Après un changement de ces valeurs, redémarrez Vite ou reconstruisez l’application.
 
 Pour préparer et prévisualiser la version optimisée :
 

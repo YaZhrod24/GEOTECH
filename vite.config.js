@@ -4,14 +4,23 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const apiTarget = env.VITE_API_PROXY_TARGET || env.VITE_API_URL || 'https://172.27.0.57'
+  const apiTarget = env.VITE_API_PROXY_TARGET || env.VITE_API_URL || 'https://172.27.0.55'
 
   const apiProxy = {
-    '/api': {
+    '/login': {
       target: apiTarget,
       changeOrigin: true,
       secure: false,
-      rewrite: (path) => path.replace(/^\/api/, ''),
+    },
+    '/compte': {
+      target: apiTarget,
+      changeOrigin: true,
+      secure: false,
+    },
+    '/interventions': {
+      target: apiTarget,
+      changeOrigin: true,
+      secure: false,
     },
   }
 
