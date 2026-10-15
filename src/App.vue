@@ -1,9 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 // Récupération des fonctions d'API pour la connexion et la récupération du compte depuis le fichier api.js
-import { getAccount, getTodayInterventions, login, chargerMissions } from './api.js'
-
-const mesMissions = ref([]);
+import { getAccount, getTodayInterventions, login } from './api.js'
 
 // variables de gestion du compte et de la session
 const email = ref('')
@@ -22,13 +20,29 @@ const sessionToken = ref('')
 
 // nom du token dans le localStorage pour la gestion de la session
 const tokenStorageKey = 'geotech_access_token'
+const accountStorageKey = 'account_geotech'
+const missionsStorageKey = 'missions_geotech'
+
+function readStoredJson(key) {
+  const storedValue = localStorage.getItem(key)
+  if (!storedValue) {
+    return null
+  }
+
+  try {
+    return JSON.parse(storedValue)
+  } catch {
+    localStorage.removeItem(key)
+    return null
+  }
+}
 
 // Fonction pour charger les informations du compte à partir du token
 async function loadAccount(token) {
   try {
     account.value = await getAccount(token)
     // Succès : on sauvegarde le profil localement
-    localStorage.setItem('account_geotech', JSON.stringify(account.value))
+    localStorage.setItem(accountStorageKey, JSON.stringify(account.value))
   } catch (error) {
     if (error.status === 401 || error.status === 403) {
       localStorage.removeItem(tokenStorageKey)
@@ -37,9 +51,9 @@ async function loadAccount(token) {
     }
     
     // Échec (hors ligne) : on lit le profil sauvegardé
-    const sauvegardeCompte = localStorage.getItem('account_geotech')
+    const sauvegardeCompte = readStoredJson(accountStorageKey)
     if (sauvegardeCompte) {
-      account.value = JSON.parse(sauvegardeCompte)
+      account.value = sauvegardeCompte
       return true // On force la réussite pour passer à l'étape des missions
     }
     throw error
@@ -54,7 +68,7 @@ async function loadPlanning(token) {
   try {
     const response = await getTodayInterventions(token)
     interventions.value = response
-    localStorage.setItem('missions_geotech', JSON.stringify(response))
+    localStorage.setItem(missionsStorageKey, JSON.stringify(response))
   } catch (error) {
     if (error.status === 401 || error.status === 403) {
       localStorage.removeItem(tokenStorageKey)
@@ -64,9 +78,9 @@ async function loadPlanning(token) {
       planningError.value = 'Votre session a expiré. Veuillez vous reconnecter.'
     } else {
       // Lecture de la sauvegarde hors ligne
-      const sauvegarde = localStorage.getItem('missions_geotech')
+      const sauvegarde = readStoredJson(missionsStorageKey)
       if (sauvegarde) {
-        interventions.value = JSON.parse(sauvegarde)
+        interventions.value = sauvegarde
         planningError.value = '' // IMPORTANT : On vide l'erreur pour débloquer l'affichage
       } else {
         planningError.value = error.message
@@ -91,12 +105,31 @@ async function startSession(token) {
 
 onMounted(async () => {
   const savedToken = localStorage.getItem(tokenStorageKey)
+  const sauvegardeCompte = readStoredJson(accountStorageKey)
+  const sauvegardeMissions = readStoredJson(missionsStorageKey)
 
   if (savedToken) {
-    try {
-      await startSession(savedToken)
-    } catch (error) {
-      errorMessage.value = error.message
+    sessionToken.value = savedToken
+    if (sauvegardeCompte) {
+      account.value = sauvegardeCompte
+    }
+    if (Array.isArray(sauvegardeMissions)) {
+      interventions.value = sauvegardeMissions
+    }
+
+    if (!account.value) {
+      try {
+        await startSession(savedToken)
+      } catch (error) {
+        errorMessage.value = error.message
+      }
+    } else {
+      isLoadingSession.value = false
+      startSession(savedToken).catch((error) => {
+        if (!account.value) {
+          errorMessage.value = error.message
+        }
+      })
     }
   }
 
@@ -180,11 +213,6 @@ function statusLabel(status) {
   }[status] || status || 'Statut inconnu'
 }
 
-onMounted(async () => {
-  // Au chargement de la page, on récupère les missions
-  mesMissions.value = await chargerMissions(); 
-});
-
 </script>
 
 <template>
@@ -224,7 +252,7 @@ onMounted(async () => {
         </button>
       </div>
 
-      <div v-if="isLoadingPlanning" class="planning-state" aria-live="polite">
+      <div v-if="isLoadingPlanning && interventions.length === 0" class="planning-state" aria-live="polite">
         <span class="loading-indicator" aria-hidden="true"></span>
         <span>Chargement de votre planning…</span>
       </div>
