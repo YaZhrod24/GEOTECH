@@ -11,11 +11,6 @@ const errorMessage = ref('')
 const isSubmitting = ref(false)
 const isLoadingSession = ref(true)
 const account = ref(null)
-const deferredInstallPrompt = ref(null)
-const showInstallPrompt = ref(false)
-const isIosInstall = ref(false)
-const isInstalling = ref(false)
-const installError = ref('')
 
 // variables de gestion du planning et des interventions
 const interventions = ref([])
@@ -27,74 +22,6 @@ const sessionToken = ref('')
 const tokenStorageKey = 'geotech_access_token'
 const accountStorageKey = 'account_geotech'
 const missionsStorageKey = 'missions_geotech'
-const installPromptDismissedKey = 'geotech_install_prompt_dismissed'
-
-function isMobileOrTablet() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent,
-  ) || (navigator.maxTouchPoints > 1 && window.innerWidth <= 1024)
-}
-
-function isStandaloneMode() {
-  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
-}
-
-function isInstallableContext() {
-  return window.isSecureContext || window.location.hostname === 'localhost'
-}
-
-function prepareInstallPrompt() {
-  if (!isMobileOrTablet() || isStandaloneMode() || sessionStorage.getItem(installPromptDismissedKey)) {
-    return
-  }
-
-  const userAgent = navigator.userAgent
-  isIosInstall.value = /iPhone|iPad|iPod/i.test(userAgent)
-  showInstallPrompt.value = true
-}
-
-function handleBeforeInstallPrompt(event) {
-  event.preventDefault()
-  deferredInstallPrompt.value = event
-  if (!isStandaloneMode() && isMobileOrTablet() && !sessionStorage.getItem(installPromptDismissedKey)) {
-    showInstallPrompt.value = true
-  }
-}
-
-async function installApplication() {
-  installError.value = ''
-
-  if (isIosInstall.value) {
-    installError.value = 'Sur iPhone ou iPad : ouvrez le menu Partager, puis choisissez « Sur l’écran d’accueil ».'
-    return
-  }
-
-  if (!deferredInstallPrompt.value) {
-    installError.value = window.isSecureContext
-      ? 'Android ne propose pas encore l’installation native. Vérifiez que vous utilisez Chrome et que le site est ouvert directement.'
-      : 'Android bloque l’installation native en HTTP. Il faut ouvrir cette application en HTTPS (ou sur localhost).'
-    return
-  }
-
-  isInstalling.value = true
-  try {
-    await deferredInstallPrompt.value.prompt()
-    const choice = await deferredInstallPrompt.value.userChoice
-    if (choice.outcome === 'accepted') {
-      showInstallPrompt.value = false
-    }
-    deferredInstallPrompt.value = null
-  } catch (error) {
-    installError.value = 'L’installation n’a pas pu être lancée. Réessayez depuis le menu du navigateur.'
-  } finally {
-    isInstalling.value = false
-  }
-}
-
-function dismissInstallPrompt() {
-  showInstallPrompt.value = false
-  sessionStorage.setItem(installPromptDismissedKey, 'true')
-}
 
 function readStoredJson(key) {
   const storedValue = localStorage.getItem(key)
@@ -177,10 +104,6 @@ async function startSession(token) {
 }
 
 onMounted(async () => {
-  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-  window.addEventListener('appinstalled', dismissInstallPrompt)
-  prepareInstallPrompt()
-
   const savedToken = localStorage.getItem(tokenStorageKey)
   const sauvegardeCompte = readStoredJson(accountStorageKey)
   const sauvegardeMissions = readStoredJson(missionsStorageKey)
@@ -442,28 +365,6 @@ function statusLabel(status) {
         Accès réservé aux techniciens GeoTech
       </p>
     </section>
-
-    <aside v-if="showInstallPrompt" class="install-prompt" aria-labelledby="install-title">
-      <button
-        class="install-close"
-        type="button"
-        aria-label="Fermer"
-        @click="dismissInstallPrompt"
-      >
-        ×
-      </button>
-      <div class="install-prompt-content">
-        <p class="eyebrow">APPLICATION MOBILE</p>
-        <h2 id="install-title">Installer GeoTech</h2>
-        <p v-if="!installError">
-          Retrouvez vos interventions rapidement depuis l’écran d’accueil de votre appareil.
-        </p>
-        <p v-else class="install-help" role="status">{{ installError }}</p>
-        <button class="install-button" type="button" :disabled="isInstalling" @click="installApplication">
-          {{ isInstalling ? 'Installation…' : isIosInstall ? 'Voir comment installer' : deferredInstallPrompt ? 'Installer l’application' : isInstallableContext() ? 'Préparer l’installation' : 'Pourquoi ce n’est pas possible' }}
-        </button>
-      </div>
-    </aside>
 
     <footer class="page-footer">
       <span>GeoTech Interventions</span>

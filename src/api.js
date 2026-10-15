@@ -35,7 +35,7 @@ export async function apiRequest(path, { token, method = 'GET', body } = {}) {
     throw new Error('Impossible de joindre le serveur. Vérifiez votre connexion réseau.')
   }
 
-  // On lit la réponse du serveur en tant que texte. Si le texte n'est pas vide, on tente de le parser en JSON.
+  // Lire le texte permet de produire une erreur utile quand le serveur renvoie une page HTML.
   const responseText = await response.text()
   let data = null
 
@@ -43,7 +43,10 @@ export async function apiRequest(path, { token, method = 'GET', body } = {}) {
     try {
       data = JSON.parse(responseText)
     } catch {
-      throw new Error('Le serveur a renvoyé une réponse illisible.')
+      const contentType = response.headers.get('content-type') || 'type inconnu'
+      throw new Error(
+        `Le serveur a renvoyé une réponse non JSON (${response.status}, ${contentType}).`,
+      )
     }
   }
 

@@ -547,74 +547,6 @@ h1 {
   font-size: 11px;
 }
 
-.install-prompt {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  z-index: 10;
-  display: flex;
-  width: min(calc(100% - 36px), 390px);
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 16px 40px rgb(26 53 37 / 18%);
-}
-
-.install-prompt-content {
-  padding-right: 12px;
-}
-
-.install-prompt h2 {
-  margin: 4px 0 6px;
-  font-size: 18px;
-}
-
-.install-prompt p:not(.eyebrow) {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.install-help {
-  color: var(--brand-dark) !important;
-}
-
-.install-button {
-  min-height: 40px;
-  margin-top: 14px;
-  padding: 0 14px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--brand);
-  color: #fff;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.install-button:hover {
-  background: var(--brand-dark);
-}
-
-.install-button:disabled {
-  cursor: wait;
-  opacity: 0.75;
-}
-
-.install-close {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 22px;
-  line-height: 1;
-}
-
 @media (max-width: 480px) {
   .login-page {
     justify-content: flex-start;
@@ -633,12 +565,6 @@ h1 {
 
   .page-footer {
     margin-top: 16px;
-  }
-
-  .install-prompt {
-    right: 12px;
-    bottom: 12px;
-    width: calc(100% - 24px);
   }
 
   .planning-page {
