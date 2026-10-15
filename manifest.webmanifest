@@ -1,1 +1,1 @@
-{"name":"Geotech","short_name":"Geotech","start_url":"/","display":"standalone","background_color":"#ffffff","theme_color":"#ffffff","lang":"en","scope":"/","icons":[{"src":"/logo.svg","sizes":"192x192","type":"image/svg+xml"}]}
+{"name":"GeoTech Interventions","short_name":"GeoTech","description":"Espace mobile des techniciens GeoTech.","start_url":"/","display":"standalone","background_color":"#f5f8f6","theme_color":"#00bf63","lang":"fr-FR","scope":"/","icons":[{"src":"/logo.svg","sizes":"any","type":"image/svg+xml"}]}
