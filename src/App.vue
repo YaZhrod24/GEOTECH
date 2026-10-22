@@ -1,7 +1,7 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 // Récupération des fonctions d'API pour la connexion et la récupération du compte depuis le fichier api.js
-import { getAccount, getTodayInterventions, login } from './api.js'
+import { getAccount, getTodayInterventions, login, updateInterventionStatus } from './api.js'
 
 // variables de gestion du compte et de la session
 const email = ref('')
@@ -17,11 +17,21 @@ const interventions = ref([])
 const isLoadingPlanning = ref(false)
 const planningError = ref('')
 const sessionToken = ref('')
+const selectedInterventionId = ref(null)
+const reportDraft = ref('')
+const interventionActionError = ref('')
+const interventionActionMessage = ref('')
+const isUpdatingIntervention = ref(false)
+const isOnline = ref(typeof navigator === 'undefined' ? true : navigator.onLine)
+const pendingInterventionUpdates = ref([])
+const isSyncingPending = ref(false)
+const connectionMessage = ref('')
 
 // nom du token dans le localStorage pour la gestion de la session
 const tokenStorageKey = 'geotech_access_token'
 const accountStorageKey = 'account_geotech'
 const missionsStorageKey = 'missions_geotech'
+const pendingUpdatesStorageKey = 'pending_intervention_updates'
 
 function readStoredJson(key) {
   const storedValue = localStorage.getItem(key)
@@ -37,8 +47,72 @@ function readStoredJson(key) {
   }
 }
 
+function savePendingUpdates() {
+  localStorage.setItem(
+    pendingUpdatesStorageKey,
+    JSON.stringify(pendingInterventionUpdates.value),
+  )
+}
+
+function loadPendingUpdates() {
+  const storedUpdates = readStoredJson(pendingUpdatesStorageKey)
+  pendingInterventionUpdates.value = Array.isArray(storedUpdates) ? storedUpdates : []
+}
+
+function isNetworkError(error) {
+  return !error.status && (
+    !isOnline.value
+    || error.message.includes('Impossible de joindre le serveur')
+  )
+}
+
+function applyInterventionUpdates(interventionId, updates) {
+  const interventionIndex = interventions.value.findIndex(
+    (intervention) => intervention.id_intervention === interventionId,
+  )
+
+  if (interventionIndex === -1) {
+    return false
+  }
+
+  interventions.value[interventionIndex] = {
+    ...interventions.value[interventionIndex],
+    ...updates,
+  }
+  updateStoredInterventions()
+  return true
+}
+
+function queueInterventionUpdate(interventionId, updates) {
+  const existingUpdate = pendingInterventionUpdates.value.find(
+    (pendingUpdate) => pendingUpdate.interventionId === interventionId,
+  )
+
+  if (existingUpdate) {
+    existingUpdate.updates = {
+      ...existingUpdate.updates,
+      ...updates,
+    }
+  } else {
+    pendingInterventionUpdates.value.push({
+      interventionId,
+      updates,
+    })
+  }
+
+  savePendingUpdates()
+}
+
 // Fonction pour charger les informations du compte à partir du token
 async function loadAccount(token) {
+  if (!isOnline.value) {
+    const sauvegardeCompte = readStoredJson(accountStorageKey)
+    if (sauvegardeCompte) {
+      account.value = sauvegardeCompte
+      return true
+    }
+  }
+
   try {
     account.value = await getAccount(token)
     // Succès : on sauvegarde le profil localement
@@ -65,9 +139,21 @@ async function loadPlanning(token) {
   planningError.value = ''
   isLoadingPlanning.value = true
 
+  if (!isOnline.value) {
+    const sauvegarde = readStoredJson(missionsStorageKey)
+    if (Array.isArray(sauvegarde)) {
+      interventions.value = sauvegarde
+      applyPendingUpdatesToInterventions()
+      updateStoredInterventions()
+    }
+    isLoadingPlanning.value = false
+    return
+  }
+
   try {
     const response = await getTodayInterventions(token)
     interventions.value = response
+    applyPendingUpdatesToInterventions()
     localStorage.setItem(missionsStorageKey, JSON.stringify(response))
   } catch (error) {
     if (error.status === 401 || error.status === 403) {
@@ -81,7 +167,11 @@ async function loadPlanning(token) {
       const sauvegarde = readStoredJson(missionsStorageKey)
       if (sauvegarde) {
         interventions.value = sauvegarde
+        applyPendingUpdatesToInterventions()
+        updateStoredInterventions()
         planningError.value = '' // IMPORTANT : On vide l'erreur pour débloquer l'affichage
+      } else if (interventions.value.length > 0) {
+        planningError.value = ''
       } else {
         planningError.value = error.message
       }
@@ -100,10 +190,81 @@ async function startSession(token) {
 
   sessionToken.value = token
   await loadPlanning(token)
+  if (isOnline.value && pendingInterventionUpdates.value.length > 0) {
+    await synchronizePendingUpdates()
+    if (isOnline.value && pendingInterventionUpdates.value.length === 0) {
+      await loadPlanning(token)
+    }
+  }
   return true
 }
 
+function applyPendingUpdatesToInterventions() {
+  pendingInterventionUpdates.value.forEach(({ interventionId, updates }) => {
+    applyInterventionUpdates(interventionId, updates)
+  })
+}
+
+async function synchronizePendingUpdates() {
+  if (
+    !isOnline.value
+    || isSyncingPending.value
+    || pendingInterventionUpdates.value.length === 0
+  ) {
+    return
+  }
+
+  isSyncingPending.value = true
+  try {
+    while (pendingInterventionUpdates.value.length > 0 && isOnline.value) {
+      const pendingUpdate = pendingInterventionUpdates.value[0]
+      try {
+        await updateInterventionStatus(
+          sessionToken.value,
+          pendingUpdate.interventionId,
+          pendingUpdate.updates,
+        )
+        pendingInterventionUpdates.value.shift()
+        savePendingUpdates()
+      } catch (error) {
+        if (error.status === 401 || error.status === 403) {
+          logout()
+          errorMessage.value = 'Votre session a expiré. Veuillez vous reconnecter.'
+        } else if (isNetworkError(error)) {
+          isOnline.value = false
+          connectionMessage.value = 'Synchronisation interrompue. Vos actions restent enregistrées sur cet appareil.'
+        } else {
+          interventionActionError.value = error.message
+        }
+        break
+      }
+    }
+  } finally {
+    isSyncingPending.value = false
+  }
+}
+
+async function handleOnline() {
+  isOnline.value = true
+  connectionMessage.value = 'Connexion rétablie. Synchronisation de vos actions…'
+  await synchronizePendingUpdates()
+  if (sessionToken.value) {
+    await loadPlanning(sessionToken.value)
+  }
+  connectionMessage.value = pendingInterventionUpdates.value.length > 0
+    ? 'Certaines actions restent en attente de synchronisation.'
+    : 'Connexion rétablie. Vos données sont à jour.'
+}
+
+function handleOffline() {
+  isOnline.value = false
+  connectionMessage.value = 'Vous êtes hors ligne. Vos actions sont enregistrées sur cet appareil.'
+}
+
 onMounted(async () => {
+  loadPendingUpdates()
+  window.addEventListener('online', handleOnline)
+  window.addEventListener('offline', handleOffline)
   const savedToken = localStorage.getItem(tokenStorageKey)
   const sauvegardeCompte = readStoredJson(accountStorageKey)
   const sauvegardeMissions = readStoredJson(missionsStorageKey)
@@ -134,6 +295,11 @@ onMounted(async () => {
   }
 
   isLoadingSession.value = false
+})
+
+onUnmounted(() => {
+  window.removeEventListener('online', handleOnline)
+  window.removeEventListener('offline', handleOffline)
 })
 
 // Gestion de la soumission du formulaire de connexion
@@ -176,6 +342,12 @@ function logout() {
   planningError.value = ''
   interventions.value = []
   sessionToken.value = ''
+  selectedInterventionId.value = null
+  reportDraft.value = ''
+  interventionActionError.value = ''
+  interventionActionMessage.value = ''
+  pendingInterventionUpdates.value = []
+  localStorage.removeItem(pendingUpdatesStorageKey)
 }
 
 // Fonction pour formater la date et l'heure d'une intervention pour l'affichage
@@ -213,11 +385,130 @@ function statusLabel(status) {
   }[status] || status || 'Statut inconnu'
 }
 
+const selectedIntervention = computed(() => (
+  interventions.value.find(
+    (intervention) => intervention.id_intervention === selectedInterventionId.value,
+  ) || null
+))
+
+const nextStatus = computed(() => ({
+  OUVERTE: 'EN_COURS',
+  EN_COURS: 'CLOTUREE',
+}[selectedIntervention.value?.statut] || null))
+
+function toggleIntervention(intervention) {
+  if (selectedInterventionId.value === intervention.id_intervention) {
+    selectedInterventionId.value = null
+    return
+  }
+
+  selectedInterventionId.value = intervention.id_intervention
+  reportDraft.value = intervention.rapport || ''
+  interventionActionError.value = ''
+  interventionActionMessage.value = ''
+}
+
+function updateStoredInterventions() {
+  localStorage.setItem(missionsStorageKey, JSON.stringify(interventions.value))
+}
+
+async function saveIntervention(updates, successMessage) {
+  if (!selectedIntervention.value || selectedIntervention.value.statut === 'CLOTUREE') {
+    return
+  }
+
+  interventionActionError.value = ''
+  interventionActionMessage.value = ''
+  isUpdatingIntervention.value = true
+
+  const interventionId = selectedIntervention.value.id_intervention
+  applyInterventionUpdates(interventionId, updates)
+
+  if (!isOnline.value) {
+    queueInterventionUpdate(interventionId, updates)
+    reportDraft.value = selectedIntervention.value?.rapport ?? reportDraft.value
+    interventionActionMessage.value = 'Action enregistrée sur cet appareil. Elle sera synchronisée dès le retour de la connexion.'
+    isUpdatingIntervention.value = false
+    return
+  }
+
+  try {
+    const response = await updateInterventionStatus(
+      sessionToken.value,
+      interventionId,
+      updates,
+    )
+    const updatedIntervention = response?.intervention || response?.data || response
+    const interventionIndex = interventions.value.findIndex(
+      (intervention) => intervention.id_intervention === interventionId,
+    )
+    const responseContainsIntervention = updatedIntervention
+      && typeof updatedIntervention === 'object'
+      && ('id_intervention' in updatedIntervention
+        || 'statut' in updatedIntervention
+        || 'rapport' in updatedIntervention)
+
+    if (interventionIndex !== -1) {
+      interventions.value[interventionIndex] = {
+        ...interventions.value[interventionIndex],
+        ...updates,
+        ...(responseContainsIntervention ? updatedIntervention : {}),
+      }
+    }
+
+    updateStoredInterventions()
+    reportDraft.value = interventions.value[interventionIndex]?.rapport ?? reportDraft.value
+    interventionActionMessage.value = successMessage
+  } catch (error) {
+    if (error.status === 401 || error.status === 403) {
+      logout()
+      errorMessage.value = 'Votre session a expiré. Veuillez vous reconnecter.'
+    } else if (isNetworkError(error)) {
+      isOnline.value = false
+      queueInterventionUpdate(interventionId, updates)
+      interventionActionMessage.value = 'Connexion perdue. Action enregistrée sur cet appareil et mise en attente.'
+    } else {
+      interventionActionError.value = error.message
+    }
+  } finally {
+    isUpdatingIntervention.value = false
+  }
+}
+
+function saveReport() {
+  return saveIntervention({ rapport: reportDraft.value }, 'Rapport enregistré.')
+}
+
+function advanceIntervention() {
+  if (!nextStatus.value) {
+    return
+  }
+
+  return saveIntervention(
+    { statut: nextStatus.value, rapport: reportDraft.value },
+    `Statut mis à jour : ${statusLabel(nextStatus.value)}.`,
+  )
+}
+
 </script>
 
 <template>
   <!-- ------------------------------ Chargement de la session ------------------------------ -->
   <main class="login-page">
+    <div
+      v-if="!isOnline || connectionMessage"
+      class="connection-banner"
+      :class="{ 'is-online': isOnline && !isSyncingPending }"
+      role="status"
+      aria-live="polite"
+    >
+      <span class="connection-dot" aria-hidden="true"></span>
+      <span>
+        {{ !isOnline
+          ? 'Vous êtes hors ligne. Vos actions sont enregistrées sur cet appareil.'
+          : connectionMessage }}
+      </span>
+    </div>
     <section v-if="isLoadingSession" class="login-card loading-card" aria-live="polite">
       <span class="loading-indicator" aria-hidden="true"></span>
       <p>Vérification de votre session…</p>
@@ -268,9 +559,22 @@ function statusLabel(status) {
           <time class="intervention-time">
             {{ formatPlanningDate(intervention.date_intervention) }}
           </time>
-          <article class="intervention-card">
+          <article
+            class="intervention-card"
+            :class="{ 'is-selected': selectedInterventionId === intervention.id_intervention }"
+            @click="toggleIntervention(intervention)"
+          >
             <div class="intervention-card-header">
-              <h2>{{ intervention.client_nom || 'Client non renseigné' }}</h2>
+              <button
+                class="intervention-summary"
+                type="button"
+                :aria-expanded="selectedInterventionId === intervention.id_intervention"
+              >
+                <h2>{{ intervention.client_nom || 'Client non renseigné' }}</h2>
+                <span class="intervention-action-hint">
+                  {{ selectedInterventionId === intervention.id_intervention ? 'Fermer' : 'Gérer' }}
+                </span>
+              </button>
               <span class="status-badge" :class="`status-${intervention.statut?.toLowerCase()}`">
                 {{ statusLabel(intervention.statut) }}
               </span>
@@ -292,6 +596,48 @@ function statusLabel(status) {
                 <dd>{{ intervention.desc_panne }}</dd>
               </div>
             </dl>
+            <div
+              v-if="selectedInterventionId === intervention.id_intervention"
+              class="intervention-editor"
+              @click.stop
+            >
+              <label :for="`rapport-${intervention.id_intervention}`">Rapport d’intervention</label>
+              <textarea
+                :id="`rapport-${intervention.id_intervention}`"
+                v-model="reportDraft"
+                rows="5"
+                :disabled="intervention.statut === 'CLOTUREE' || isUpdatingIntervention"
+                placeholder="Décrivez l’intervention réalisée…"
+              ></textarea>
+              <p v-if="intervention.statut === 'CLOTUREE'" class="editor-note">
+                Cette intervention est clôturée et ne peut plus être modifiée.
+              </p>
+              <div v-else class="intervention-actions">
+                <button
+                  class="secondary-button"
+                  type="button"
+                  :disabled="isUpdatingIntervention"
+                  @click="saveReport"
+                >
+                  Enregistrer le rapport
+                </button>
+                <button
+                  v-if="nextStatus"
+                  class="status-button"
+                  type="button"
+                  :disabled="isUpdatingIntervention"
+                  @click="advanceIntervention"
+                >
+                  {{ isUpdatingIntervention ? 'Mise à jour…' : `Passer à « ${statusLabel(nextStatus)} »` }}
+                </button>
+              </div>
+              <p v-if="interventionActionMessage" class="form-message success-message" role="status">
+                {{ interventionActionMessage }}
+              </p>
+              <p v-if="interventionActionError" class="form-message error-message" role="alert">
+                {{ interventionActionError }}
+              </p>
+            </div>
           </article>
         </li>
       </ol>
