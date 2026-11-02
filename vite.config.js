@@ -1,28 +1,29 @@
-import { defineConfig, loadEnv } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig, loadEnv } from "vite";
+import vue from "@vitejs/plugin-vue";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  const apiTarget = env.VITE_API_PROXY_TARGET || env.VITE_API_URL || 'https://192.168.1.12'
+  const env = loadEnv(mode, process.cwd(), "");
+  const apiTarget =
+    env.VITE_API_PROXY_TARGET || env.VITE_API_URL || "http://172.27.0.55";
 
   const apiProxy = {
-    '/login': {
+    "/login": {
       target: apiTarget,
       changeOrigin: true,
       secure: false,
     },
-    '/compte': {
+    "/compte": {
       target: apiTarget,
       changeOrigin: true,
       secure: false,
     },
-    '/interventions': {
+    "/interventions": {
       target: apiTarget,
       changeOrigin: true,
       secure: false,
     },
-  }
+  };
 
   return {
     server: {
@@ -36,38 +37,38 @@ export default defineConfig(({ mode }) => {
     plugins: [
       vue(),
       VitePWA({
-        registerType: 'autoUpdate',
+        registerType: "autoUpdate",
         devOptions: {
           enabled: true,
-          type: 'module'
+          type: "module",
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,svg}']
+          globPatterns: ["**/*.{js,css,html,svg}"],
         },
         manifest: {
-          name: 'GeoTech Interventions',
-          short_name: 'GeoTech',
-          description: 'Espace mobile des techniciens GeoTech.',
-          lang: 'fr-FR',
-          start_url: '/',
-          scope: '/',
-          display: 'standalone',
-          background_color: '#f5f8f6',
-          theme_color: '#00bf63',
+          name: "GeoTech Interventions",
+          short_name: "GeoTech",
+          description: "Espace mobile des techniciens GeoTech.",
+          lang: "fr-FR",
+          start_url: "/",
+          scope: "/",
+          display: "standalone",
+          background_color: "#f5f8f6",
+          theme_color: "#00bf63",
           icons: [
             {
-              src: '/pwa-192.svg',
-              sizes: '192x192',
-              type: 'image/svg+xml'
+              src: "/pwa-192.svg",
+              sizes: "192x192",
+              type: "image/svg+xml",
             },
             {
-              src: '/pwa-512.svg',
-              sizes: '512x512',
-              type: 'image/svg+xml'
-            }
-          ]
-        }
-      })
-    ]
-  }
-})
+              src: "/pwa-512.svg",
+              sizes: "512x512",
+              type: "image/svg+xml",
+            },
+          ],
+        },
+      }),
+    ],
+  };
+});

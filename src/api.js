@@ -3,7 +3,7 @@
 const apiBaseUrl = (
   import.meta.env.DEV
     ? ''
-    : (import.meta.env.VITE_API_URL || 'https://192.168.1.12')
+    : (import.meta.env.VITE_API_URL || 'http://172.27.0.55')
 ).replace(/\/+$/, '')
 
 export async function apiRequest(path, { token, method = 'GET', body } = {}) {
