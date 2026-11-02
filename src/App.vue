@@ -381,7 +381,7 @@ function statusLabel(status) {
   return {
     OUVERTE: 'En attente',
     EN_COURS: 'En cours',
-    CLOTUREE: 'Clôturée',
+    TERMINEE: 'Clôturée',
   }[status] || status || 'Statut inconnu'
 }
 
@@ -393,7 +393,7 @@ const selectedIntervention = computed(() => (
 
 const nextStatus = computed(() => ({
   OUVERTE: 'EN_COURS',
-  EN_COURS: 'CLOTUREE',
+  EN_COURS: 'TERMINEE',
 }[selectedIntervention.value?.statut] || null))
 
 function toggleIntervention(intervention) {
@@ -413,7 +413,7 @@ function updateStoredInterventions() {
 }
 
 async function saveIntervention(updates, successMessage) {
-  if (!selectedIntervention.value || selectedIntervention.value.statut === 'CLOTUREE') {
+  if (!selectedIntervention.value || selectedIntervention.value.statut === 'TERMINEE') {
     return
   }
 
@@ -606,10 +606,10 @@ function advanceIntervention() {
                 :id="`rapport-${intervention.id_intervention}`"
                 v-model="reportDraft"
                 rows="5"
-                :disabled="intervention.statut === 'CLOTUREE' || isUpdatingIntervention"
+                :disabled="intervention.statut === 'TERMINEE' || isUpdatingIntervention"
                 placeholder="Décrivez l’intervention réalisée…"
               ></textarea>
-              <p v-if="intervention.statut === 'CLOTUREE'" class="editor-note">
+              <p v-if="intervention.statut === 'TERMINEE'" class="editor-note">
                 Cette intervention est clôturée et ne peut plus être modifiée.
               </p>
               <div v-else class="intervention-actions">
