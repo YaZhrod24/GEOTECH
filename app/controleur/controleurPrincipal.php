@@ -26,6 +26,7 @@ class ControleurPrincipal
             'intervention/{id}' => 'interventionView',
             'intervention/modifier/{id}' => 'interventionModify',
             'login' => 'login',
+            'logout' => 'logout',
             'utilisateur/{id}' => 'afficherUtilisateur',
             'utilisateur/{id}/modifier' => 'modifierUtilisateur',
             'utilisateur/{id}/supprimer' => 'supprimerUtilisateur',
@@ -132,6 +133,16 @@ class ControleurPrincipal
         require_once Racine . '/../app/controleur/controleurLogin.php';
     }
 
+    private function logout()
+    {
+        // Détruire la session pour déconnecter l'utilisateur
+        session_unset();
+        session_destroy();
+
+        // Rediriger vers la page de connexion ou la page d'accueil
+        header('Location: /login');
+        exit();
+    }
 
     private function afficherUtilisateur($id)
     {

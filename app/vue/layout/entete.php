@@ -203,25 +203,37 @@ $pageCourante = $pageCourante === 'dashboard' ? '' : $pageCourante;
             </div>
 
             <ul class="nav flex-column mt-3 mb-auto">
-                <li class="nav-item"><a class="nav-link d-flex align-items-center <?= $pageCourante === '' ? 'active' : '' ?>" href="/"><i
-                            class="bi bi-grid-1x2-fill nav-icon me-3"></i><span class="nav-text">Dashboard</span></a>
+                <li class="nav-item"><a
+                        class="nav-link d-flex align-items-center <?= $pageCourante === '' ? 'active' : '' ?>"
+                        href="/"><i class="bi bi-grid-1x2-fill nav-icon me-3"></i><span
+                            class="nav-text">Dashboard</span></a>
                 </li>
-                <li class="nav-item"><a class="nav-link d-flex align-items-center <?= $pageCourante === 'planning' ? 'active' : '' ?>" href="/planning"><i
-                            class="bi bi-calendar-event nav-icon me-3"></i><span class="nav-text">Planning</span></a>
+                <li class="nav-item"><a
+                        class="nav-link d-flex align-items-center <?= $pageCourante === 'planning' ? 'active' : '' ?>"
+                        href="/planning"><i class="bi bi-calendar-event nav-icon me-3"></i><span
+                            class="nav-text">Planning</span></a>
                 </li>
-                <li class="nav-item"><a class="nav-link d-flex align-items-center <?= $pageCourante === 'interventions' ? 'active' : '' ?>" href="/interventions"><i
-                            class="bi bi-tools nav-icon me-3"></i><span class="nav-text">Interventions</span></a></li>
-                <li class="nav-item"><a class="nav-link d-flex align-items-center <?= $pageCourante === 'clients' ? 'active' : '' ?>" href="/clients"><i
-                            class="bi bi-buildings nav-icon me-3"></i><span class="nav-text">Clients</span></a></li>
-                <li class="nav-item"><a class="nav-link d-flex align-items-center <?= $pageCourante === 'equipements' ? 'active' : '' ?>" href="/equipements"><i
-                            class="bi bi-router nav-icon me-3"></i><span class="nav-text">Équipements</span></a></li>
-                <li class="nav-item"><a class="nav-link d-flex align-items-center <?= $pageCourante === 'techniciens' ? 'active' : '' ?>" href="/techniciens"><i
-                            class="bi bi-person-badge nav-icon me-3"></i><span class="nav-text">Techniciens</span></a>
+                <li class="nav-item"><a
+                        class="nav-link d-flex align-items-center <?= $pageCourante === 'interventions' ? 'active' : '' ?>"
+                        href="/interventions"><i class="bi bi-tools nav-icon me-3"></i><span
+                            class="nav-text">Interventions</span></a></li>
+                <li class="nav-item"><a
+                        class="nav-link d-flex align-items-center <?= $pageCourante === 'clients' ? 'active' : '' ?>"
+                        href="/clients"><i class="bi bi-buildings nav-icon me-3"></i><span
+                            class="nav-text">Clients</span></a></li>
+                <li class="nav-item"><a
+                        class="nav-link d-flex align-items-center <?= $pageCourante === 'equipements' ? 'active' : '' ?>"
+                        href="/equipements"><i class="bi bi-router nav-icon me-3"></i><span
+                            class="nav-text">Équipements</span></a></li>
+                <li class="nav-item"><a
+                        class="nav-link d-flex align-items-center <?= $pageCourante === 'techniciens' ? 'active' : '' ?>"
+                        href="/techniciens"><i class="bi bi-person-badge nav-icon me-3"></i><span
+                            class="nav-text">Techniciens</span></a>
                 </li>
             </ul>
 
             <div class="p-3 border-top">
-                <a class="nav-link logout-link d-flex align-items-center" href="/connexion">
+                <a class="nav-link logout-link d-flex align-items-center" href="/logout">
                     <i class="bi bi-box-arrow-right nav-icon me-3"></i><span class="nav-text">Déconnexion</span>
                 </a>
             </div>
